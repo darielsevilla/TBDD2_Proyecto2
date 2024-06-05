@@ -1,5 +1,6 @@
 
 import java.awt.Color;
+import javax.swing.JDialog;
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
@@ -31,6 +32,32 @@ public class MainFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        Job = new javax.swing.JDialog();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel19 = new javax.swing.JLabel();
+        bt_replicar = new javax.swing.JPanel();
+        jLabel21 = new javax.swing.JLabel();
+        bt_tabla = new javax.swing.JPanel();
+        jLabel20 = new javax.swing.JLabel();
+        jLabel18 = new javax.swing.JLabel();
+        Tablas = new javax.swing.JDialog();
+        jPanel2 = new javax.swing.JPanel();
+        jLabel23 = new javax.swing.JLabel();
+        jLabel24 = new javax.swing.JLabel();
+        jLabel37 = new javax.swing.JLabel();
+        bt_right = new javax.swing.JPanel();
+        jLabel36 = new javax.swing.JLabel();
+        bt_cancelar = new javax.swing.JPanel();
+        jLabel30 = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jl_tablaR = new javax.swing.JList<>();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jl_tablaSR = new javax.swing.JList<>();
+        bt_left = new javax.swing.JPanel();
+        jLabel31 = new javax.swing.JLabel();
+        bt_guardarT = new javax.swing.JPanel();
+        jLabel32 = new javax.swing.JLabel();
+        jLabel22 = new javax.swing.JLabel();
         Fondo = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
@@ -64,6 +91,190 @@ public class MainFrame extends javax.swing.JFrame {
         jLabel15 = new javax.swing.JLabel();
         jLabel17 = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
+
+        Job.getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel19.setFont(new java.awt.Font("Segoe UI", 3, 24)); // NOI18N
+        jLabel19.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel19.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel19.setText("Job");
+        jPanel1.add(jLabel19, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 40, 400, -1));
+
+        bt_replicar.setBackground(new java.awt.Color(90, 3, 216));
+        bt_replicar.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                bt_replicarMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                bt_replicarMouseExited(evt);
+            }
+        });
+        bt_replicar.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel21.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel21.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel21.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel21.setText("Replicar");
+        bt_replicar.add(jLabel21, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 100, -1));
+
+        jPanel1.add(bt_replicar, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 190, 100, 40));
+
+        bt_tabla.setBackground(new java.awt.Color(90, 3, 216));
+        bt_tabla.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                bt_tablaMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                bt_tablaMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                bt_tablaMouseExited(evt);
+            }
+        });
+        bt_tabla.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel20.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel20.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel20.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel20.setText("Elegir Tabla");
+        bt_tabla.add(jLabel20, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 120, -1));
+
+        jPanel1.add(bt_tabla, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 110, 120, 40));
+
+        jLabel18.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Fotos/fondo pequeño.png"))); // NOI18N
+        jPanel1.add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
+
+        Job.getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 400, 300));
+
+        Tablas.getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel23.setBackground(new java.awt.Color(255, 255, 255));
+        jLabel23.setFont(new java.awt.Font("Segoe UI", 1, 20)); // NOI18N
+        jLabel23.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel23.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel23.setText("Replicando");
+        jPanel2.add(jLabel23, new org.netbeans.lib.awtextra.AbsoluteConstraints(521, 90, 350, -1));
+
+        jLabel24.setBackground(new java.awt.Color(255, 255, 255));
+        jLabel24.setFont(new java.awt.Font("Segoe UI", 1, 20)); // NOI18N
+        jLabel24.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel24.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel24.setText("Sin Replicar");
+        jPanel2.add(jLabel24, new org.netbeans.lib.awtextra.AbsoluteConstraints(32, 90, 350, -1));
+
+        jLabel37.setFont(new java.awt.Font("Segoe UI", 3, 24)); // NOI18N
+        jLabel37.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel37.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel37.setText("TABLAS BD ORIGEN");
+        jPanel2.add(jLabel37, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 30, 900, 30));
+
+        bt_right.setBackground(new java.awt.Color(90, 3, 216));
+        bt_right.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                bt_rightMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                bt_rightMouseExited(evt);
+            }
+        });
+        bt_right.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel36.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel36.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel36.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel36.setText(">>");
+        bt_right.add(jLabel36, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 100, -1));
+
+        jPanel2.add(bt_right, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 260, -1, 40));
+
+        bt_cancelar.setBackground(new java.awt.Color(90, 3, 216));
+        bt_cancelar.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                bt_cancelarMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                bt_cancelarMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                bt_cancelarMouseExited(evt);
+            }
+        });
+        bt_cancelar.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel30.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel30.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel30.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel30.setText("Cancelar");
+        bt_cancelar.add(jLabel30, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 100, -1));
+
+        jPanel2.add(bt_cancelar, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 530, -1, 40));
+
+        jl_tablaR.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        jl_tablaR.setModel(new javax.swing.AbstractListModel<String>() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public String getElementAt(int i) { return strings[i]; }
+        });
+        jScrollPane2.setViewportView(jl_tablaR);
+
+        jPanel2.add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(550, 140, 290, 350));
+
+        jl_tablaSR.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        jl_tablaSR.setModel(new javax.swing.AbstractListModel<String>() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public String getElementAt(int i) { return strings[i]; }
+        });
+        jScrollPane1.setViewportView(jl_tablaSR);
+
+        jPanel2.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 140, 290, 350));
+
+        bt_left.setBackground(new java.awt.Color(90, 3, 216));
+        bt_left.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                bt_leftMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                bt_leftMouseExited(evt);
+            }
+        });
+        bt_left.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel31.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel31.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel31.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel31.setText("<<");
+        bt_left.add(jLabel31, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 100, -1));
+
+        jPanel2.add(bt_left, new org.netbeans.lib.awtextra.AbsoluteConstraints(400, 320, -1, 40));
+
+        bt_guardarT.setBackground(new java.awt.Color(90, 3, 216));
+        bt_guardarT.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                bt_guardarTMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                bt_guardarTMouseExited(evt);
+            }
+        });
+        bt_guardarT.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel32.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
+        jLabel32.setForeground(new java.awt.Color(255, 255, 255));
+        jLabel32.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        jLabel32.setText("Guardar");
+        bt_guardarT.add(jLabel32, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 100, -1));
+
+        jPanel2.add(bt_guardarT, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 530, -1, 40));
+
+        jLabel22.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Fotos/fondo 4.png"))); // NOI18N
+        jPanel2.add(jLabel22, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
+
+        Tablas.getContentPane().add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 900, 600));
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
@@ -192,8 +403,11 @@ public class MainFrame extends javax.swing.JFrame {
 
         Fondo.add(pn_BDorigen, new org.netbeans.lib.awtextra.AbsoluteConstraints(30, 130, 410, 360));
 
-        bt_guardar.setBackground(new java.awt.Color(79, 125, 254));
+        bt_guardar.setBackground(new java.awt.Color(90, 3, 216));
         bt_guardar.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                bt_guardarMouseClicked(evt);
+            }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 bt_guardarMouseEntered(evt);
             }
@@ -242,12 +456,72 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_bt_probarDMouseExited
 
     private void bt_guardarMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_guardarMouseEntered
-        bt_guardar.setBackground(new Color(195,22,28));
+        bt_guardar.setBackground(new Color(3,216,90));
     }//GEN-LAST:event_bt_guardarMouseEntered
 
     private void bt_guardarMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_guardarMouseExited
-        bt_guardar.setBackground(new Color(79,125,254));
+        bt_guardar.setBackground(new Color(90,3,216));
     }//GEN-LAST:event_bt_guardarMouseExited
+
+    private void bt_guardarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_guardarMouseClicked
+        AbrirJD(Job);
+    }//GEN-LAST:event_bt_guardarMouseClicked
+
+    private void bt_tablaMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_tablaMouseEntered
+        bt_tabla.setBackground(new Color(68,212,229));
+    }//GEN-LAST:event_bt_tablaMouseEntered
+
+    private void bt_tablaMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_tablaMouseExited
+        bt_tabla.setBackground(new Color(90,3,216));
+    }//GEN-LAST:event_bt_tablaMouseExited
+
+    private void bt_replicarMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_replicarMouseEntered
+        bt_replicar.setBackground(new Color(68,212,229));
+    }//GEN-LAST:event_bt_replicarMouseEntered
+
+    private void bt_replicarMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_replicarMouseExited
+        bt_replicar.setBackground(new Color(90,3,216));
+    }//GEN-LAST:event_bt_replicarMouseExited
+
+    private void bt_cancelarMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_cancelarMouseEntered
+        bt_cancelar.setBackground(new Color(195,22,28));
+    }//GEN-LAST:event_bt_cancelarMouseEntered
+
+    private void bt_cancelarMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_cancelarMouseExited
+        bt_cancelar.setBackground(new Color(90,3,216));
+    }//GEN-LAST:event_bt_cancelarMouseExited
+
+    private void bt_rightMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_rightMouseEntered
+        bt_right.setBackground(new Color(68,212,229));
+    }//GEN-LAST:event_bt_rightMouseEntered
+
+    private void bt_rightMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_rightMouseExited
+        bt_right.setBackground(new Color(90,3,216));
+    }//GEN-LAST:event_bt_rightMouseExited
+
+    private void bt_leftMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_leftMouseEntered
+        bt_left.setBackground(new Color(68,212,229));
+    }//GEN-LAST:event_bt_leftMouseEntered
+
+    private void bt_leftMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_leftMouseExited
+        bt_left.setBackground(new Color(90,3,216));
+    }//GEN-LAST:event_bt_leftMouseExited
+
+    private void bt_guardarTMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_guardarTMouseEntered
+        bt_guardarT.setBackground(new Color(3,216,90));
+    }//GEN-LAST:event_bt_guardarTMouseEntered
+
+    private void bt_guardarTMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_guardarTMouseExited
+        bt_guardarT.setBackground(new Color(90,3,216));
+    }//GEN-LAST:event_bt_guardarTMouseExited
+
+    private void bt_tablaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_tablaMouseClicked
+        AbrirJD(Tablas);
+    }//GEN-LAST:event_bt_tablaMouseClicked
+
+    private void bt_cancelarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_cancelarMouseClicked
+        Tablas.setVisible(false);
+    }//GEN-LAST:event_bt_cancelarMouseClicked
 
     /**
      * @param args the command line arguments
@@ -284,11 +558,27 @@ public class MainFrame extends javax.swing.JFrame {
         });
     }
 
+    public static void AbrirJD(JDialog JD) {
+        JD.setModal(true);
+        JD.pack();
+        JD.setLocationRelativeTo(null);
+        JD.setResizable(false);
+        JD.setVisible(true);
+    }
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel Fondo;
+    private javax.swing.JDialog Job;
+    private javax.swing.JDialog Tablas;
+    private javax.swing.JPanel bt_cancelar;
     private javax.swing.JPanel bt_guardar;
+    private javax.swing.JPanel bt_guardarT;
+    private javax.swing.JPanel bt_left;
     private javax.swing.JPanel bt_probarD;
     private javax.swing.JPanel bt_probarO;
+    private javax.swing.JPanel bt_replicar;
+    private javax.swing.JPanel bt_right;
+    private javax.swing.JPanel bt_tabla;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -298,14 +588,32 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
+    private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel20;
+    private javax.swing.JLabel jLabel21;
+    private javax.swing.JLabel jLabel22;
+    private javax.swing.JLabel jLabel23;
+    private javax.swing.JLabel jLabel24;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel30;
+    private javax.swing.JLabel jLabel31;
+    private javax.swing.JLabel jLabel32;
+    private javax.swing.JLabel jLabel36;
+    private javax.swing.JLabel jLabel37;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JList<String> jl_tablaR;
+    private javax.swing.JList<String> jl_tablaSR;
     private javax.swing.JPanel pn_BDdestino;
     private javax.swing.JPanel pn_BDorigen;
     private javax.swing.JTextField tf_BDD;
