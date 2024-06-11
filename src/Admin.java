@@ -4,6 +4,8 @@ import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -55,10 +57,13 @@ public class Admin {
             //String connectionUrl ="jdbc:sqlserver://localhost"+puerto_sqlserver+";database="+name_sqlserver+";user=" + user_sqlserver+ ";password="+pass_sqlserver+";encrypt=true;"+ "trustServerCertificate=false;" + "loginTimeout=30;";
             sqlserver = DriverManager.getConnection("jdbc:sqlserver://localhost:" + puerto_sqlserver + ";database=" + name_sqlserver + ";user=" + user_sqlserver + ";password=" + pass_sqlserver + ";encrypt=true;" + "trustServerCertificate=true;" + "loginTimeout=30;");
             loadTablas();
-            System.out.println(tablasSinReplicar.get(0));
-            printAtributos(getAtributos_sqlserver(tablasSinReplicar.get(0)));
-            tablasReplicadas.add(tablasSinReplicar.get(0));
-            replicarServerToPostgre();
+            
+            //this.printSinReplicar();
+            //System.out.println(this.tablasSinReplicar.get(8));
+            //this.tablasReplicadas.add(this.tablasSinReplicar.get(8));
+            //System.out.println(this.replicarServerToPostgre(null));
+            //tablasReplicadas.add(tablasSinReplicar.get(0));
+            //replicarServerToPostgre();
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -80,8 +85,21 @@ public class Admin {
 
             }
         } else {
-            //cargar nombres de tablas de postre en sqlserver
+            try {
+                ResultSet results = postgre.createStatement().executeQuery("select table_name, table_schema from information_schema.tables where table_schema != 'information_schema' and table_schema != 'pg_catalog'");
+                while (results.next()) {
+                    tablasSinReplicar.add(results.getString("table_schema") + "." + results.getString("table_name"));
+                    
+                }
+            } catch (Exception e) {
 
+            }
+            //cargar nombres de tablas de postre en sqlserver
+            this.printSinReplicar();
+            for (String tablas : tablasSinReplicar) {
+               this.replicarEstructura2(tablas, this.getAtributos_postgre(tablas));
+            }
+            this.printAtributos(this.getAtributos_postgre(tablasSinReplicar.get(2)));
         }
     }
 
@@ -117,7 +135,7 @@ public class Admin {
                 String tipo = atributosTabla.getString("Tipo");
                 int size = atributosTabla.getInt("max_length");
                 int precision = atributosTabla.getInt("precision");
-                
+
                 String alias = null;
                 boolean isNull = false;
                 boolean isPK = false;
@@ -139,7 +157,7 @@ public class Admin {
                     alias = tipo;
                     tipo = realName.getString("name");
                 }
-                if(tipo.contains("char")){
+                if (tipo.contains("char")) {
                     size /= 2;
                 }
                 //revisa si es foreign key
@@ -154,10 +172,20 @@ public class Admin {
                         + "WHERE f.parent_object_id = OBJECT_ID('HumanResources.Employee') AND COL_NAME(fc.parent_object_id, fc.parent_column_id) = '" + nombre + "';";
                 ResultSet foranea = sqlserver.createStatement().executeQuery(llaveForanea);
                 String rCol = null;
-                if (foranea.next()) {
+                while (foranea.next()) {
                     isFK = true;
                     reference = foranea.getString("table_name");
                     rCol = foranea.getString("referenced_column_name");
+                    boolean isThere = false;
+                    for (String str : this.tablasReplicadas) {
+
+                        if (str.equals(reference)) {
+                            isThere = true;
+                        }
+                    }
+                    if (!isThere) {
+                        return null;
+                    }
                 }
                 atributos.add(new Atribute(nombre, isFK, isPK, tipo, reference, size, isNull, alias, precision, rCol));
 
@@ -171,27 +199,223 @@ public class Admin {
 
     public ArrayList<Atribute> getAtributos_postgre(String table) {
         ArrayList<Atribute> atributos = new ArrayList<>();
+        String schema = "public";
+        String tabla = table;
+        String[] split = table.replace('.', '-').split("-");
+        if (split.length == 2) {
+            schema = split[0];
+            tabla = split[1];
+        }
+        String pKeys = "SELECT c.column_name, c.data_type\n"
+                + "FROM information_schema.table_constraints tc \n"
+                + "JOIN information_schema.constraint_column_usage AS ccu USING (constraint_schema, constraint_name) \n"
+                + "JOIN information_schema.columns AS c ON c.table_schema = tc.constraint_schema\n"
+                + "  AND tc.table_name = c.table_name AND ccu.column_name = c.column_name\n"
+                + "WHERE constraint_type = 'PRIMARY KEY' and tc.table_name = '" + tabla + "' and tc.table_schema = '" + schema + "';";
 
+        String attQuery = "SELECT *\n"
+                + "  FROM information_schema.columns\n"
+                + " WHERE table_schema = '" + schema + "'\n"
+                + "   AND table_name   = '" + tabla + "';";
+        try {
+            ResultSet keys = postgre.createStatement().executeQuery(pKeys);
+            String pKName = "";
+            if(keys.next()){
+                pKName = keys.getString("column_name");
+            }
+            
+            ResultSet rs = postgre.createStatement().executeQuery(attQuery);
+            //boolean foreignKey, String reference,String alias, String columnafk)
+            while (rs.next()) {
+                String name = rs.getString("column_name");
+                String dataType = rs.getString("udt_name");
+                int size = rs.getInt("character_maximum_length");
+                boolean isNull = false;
+                boolean pkey = false;
+                boolean fkey = false;
+                String reference = null;
+                String columnafk = null;
+                String alias = null;
+                int precision = -1;
+                //checkear null
+                String nul = rs.getString("is_nullable");
+                if (nul.equals("YES")) {
+                    isNull = true;
+                }
+
+                //precision
+                if (rs.getString("numeric_precision") != null) {
+                    precision = rs.getInt("numeric_precision");
+                }
+                //primary key
+                if (name.equals(pKName)) {
+                    pkey = true;
+                }
+
+                //foreign key
+                String sql = "SELECT\n"
+                        + "    tc.table_schema, \n"
+                        + "    tc.constraint_name, \n"
+                        + "    tc.table_name, \n"
+                        + "    kcu.column_name, \n"
+                        + "    ccu.table_schema AS foreign_table_schema,\n"
+                        + "    ccu.table_name AS foreign_table_name,\n"
+                        + "    ccu.column_name AS foreign_column_name \n"
+                        + "FROM information_schema.table_constraints AS tc \n"
+                        + "JOIN information_schema.key_column_usage AS kcu\n"
+                        + "    ON tc.constraint_name = kcu.constraint_name\n"
+                        + "    AND tc.table_schema = kcu.table_schema\n"
+                        + "JOIN information_schema.constraint_column_usage AS ccu\n"
+                        + "    ON ccu.constraint_name = tc.constraint_name\n"
+                        + "WHERE tc.constraint_type = 'FOREIGN KEY'\n"
+                        + "    AND tc.table_schema='"+schema+"'\n"
+                        + "    AND tc.table_name='"+tabla+"'\n"
+                        + "	AND kcu.column_name = '"+name+"';";
+                
+                ResultSet fk = postgre.createStatement().executeQuery(sql);
+                if(fk.next()){
+                    fkey = true;
+                    reference = fk.getString("foreign_table_name");
+                    columnafk = fk.getString("foreign_column_name");
+                }
+                
+                //chequeo de alias
+                ResultSet domain = postgre.createStatement().executeQuery("select * from information_schema.domains where domain_name = '"+name+"';");
+                if(domain.next()){
+                    alias = name;
+                    name = domain.getString("udt_name");
+                }
+                Atribute atributo = new Atribute(name, fkey, pkey, dataType, reference, size, isNull, alias, precision, columnafk);
+                atributos.add(atributo);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return atributos;
     }
 
-    public boolean replicarPostgreToServer() {
+    public boolean replicarPostgreToServer(Date date) {
+       
         return true;
     }
 
+    public boolean replicarEstructura2(String nombre, ArrayList<Atribute> atributos){
+       
+       String[] split = nombre.replace('.', '-').split("-");
+       if(split.length == 2){
+           if(split[0].equals("public")){
+               System.out.println(split[0]);
+               System.out.println(split[1]);
+               nombre =split[1];
+           }
+       }
+        String create = "create table " + nombre + "(";
+        ResultSet existe;
+        String query = "";
+        String end = "";
+        boolean tampered = false;
+        //el name es el data type pero me confundi asi que asi se queda
+        try {
+            for (int i = 0; i < atributos.size(); i++) {
+                String name = atributos.get(i).getDataType();
+                String alias = atributos.get(i).getAlias();
+                if (alias != null) {
+                    String queueAlias = "select typname from pg_type where typname = '" + alias.toLowerCase() + "'";
+                    System.out.println(alias);
+                    existe = postgre.createStatement().executeQuery(queueAlias);
+                    //si el alias ya existe es q o es un tipo de dato en postgre o ya fue definido
+                    if (existe.next()) {
+                        name = alias;
+                        alias = null;
+                   
+
+                    }
+                }
+
+                if(name.equals("int4")){
+                    name = "int";
+                    tampered = true;
+                }else if(name.equals("float8")){
+                    name = "float";
+                    tampered = true;
+                }
+                
+                
+                if (alias != null) {
+                    query = "create domain " + alias + " as " + name;
+                    if (!tampered && name.contains("char")) {
+                        query += "(" + atributos.get(i).getSize() + ")";
+                        tampered = true;
+                    }
+
+                    sqlserver.createStatement().execute(query);
+
+                    name = alias;
+                }
+
+                create += atributos.get(i).getName() + " " + name;
+                if (name.contains("char") && !tampered) {
+                    if(atributos.get(i).getSize() != 0){
+                    create += "(" + atributos.get(i).getSize() + ")";
+                    }else{
+                        create += "(max)";
+                    }
+                }
+                if (!atributos.get(i).isIsNull()) {
+                    create += " not null";
+                }
+                if (atributos.get(i).isPrimaryKey()) {
+                    create += " primary key";
+                }
+
+                if (atributos.get(i).isForeignKey()) {
+                    end += " foreign key (" +nombre +") references " + atributos.get(i).getReference() + "(" + atributos.get(i).getColumnafk() + ")";
+
+                }
+                if (i != atributos.size() - 1) {
+                    create += ",\n";
+                    query = "";
+                } else if(!end.equals("")){
+                    create += ",\n";
+                    create += end;
+                }else{
+                    create += "\n";
+                }
+
+                query = "";
+                tampered = false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        create += ")";
+
+        try {
+            System.out.println(create);
+            sqlserver.createStatement().execute(create);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
     //replicación sql server a postgre
-    public boolean replicarServerToPostgre() {
+    public boolean replicarServerToPostgre(Date date) {
         try {
             ArrayList<Atribute> atributos;
             ResultSet existe;
             for (int i = 0; i < tablasReplicadas.size(); i++) {
                 //verificar si la tabla existe
                 atributos = getAtributos_sqlserver(tablasReplicadas.get(i));
+                if (atributos == null) {
+
+                    return false;
+                }
                 String schema = "public";
                 String name = "";
                 System.out.println(tablasReplicadas.get(i));
-                String[] array = tablasReplicadas.get(i).replace('.','-').split("-");
-               
+                String[] array = tablasReplicadas.get(i).replace('.', '-').split("-");
+
                 //separar el nombre del esquema 
                 if (array.length > 1) {
                     //verificar si el esquema existe
@@ -210,9 +434,14 @@ public class Admin {
                 //ahora verifica si la tabla existe
                 existe = postgre.createStatement().executeQuery("select table_name from information_schema.tables where table_name = '" + name + "' and table_schema = '" + schema + "'");
                 //si la tabla no existe la crea
+
                 if (!existe.next()) {
-                    replicarEstructura1(tablasReplicadas.get(i), atributos);
+                    boolean replicate = replicarEstructura1(tablasReplicadas.get(i), atributos);
+
                 }
+
+                //repica datos
+                return replicarDatos1(schema, name, atributos, date);
             }
 
         } catch (SQLException ex) {
@@ -226,94 +455,99 @@ public class Admin {
         String create = "create table " + nombre + "(";
         ResultSet existe;
         String query = "";
+        String end = "";
         boolean tampered = false;
         //el name es el data type pero me confundi asi que asi se queda
         try {
             for (int i = 0; i < atributos.size(); i++) {
                 String name = atributos.get(i).getDataType();
                 String alias = atributos.get(i).getAlias();
-                if(alias != null){
+                if (alias != null) {
                     String queueAlias = "select typname from pg_type where typname = '" + alias.toLowerCase() + "'";
                     System.out.println(alias);
                     existe = postgre.createStatement().executeQuery(queueAlias);
                     //si el alias ya existe es q o es un tipo de dato en postgre o ya fue definido
                     if (existe.next()) {
-                       name = alias;
-                       alias = null;
+                        name = alias;
+                        alias = null;
                         System.out.println("entra");
-                  
+
                     }
                 }
-                 
-                if(name.equals("tinyint")){
+
+                if (name.equals("tinyint")) {
                     name = "smallint";
                     tampered = true;
-                }else if(name.equals("smallmoney")){
+                } else if (name.equals("smallmoney")) {
                     name = "money";
                     tampered = true;
-                }else if(name.equals("smalldatetime")){
+                } else if (name.equals("smalldatetime")) {
                     name = "timestamp(0)";
                     tampered = true;
-                }else if(name.equals("datetime")){
+                } else if (name.equals("datetime")) {
                     name = "timestamp(3)";
                     tampered = true;
-                }else if(name.equals("datetime2")){
+                } else if (name.equals("datetime2")) {
                     name = "timestamp(3)";
                     tampered = true;
-                }else if(name.equals("datetimeoffset")){
+                } else if (name.equals("datetimeoffset")) {
                     name = "timestamp(3) with time zone";
                     tampered = true;
-                }else if(name.equals("binary") || name.equals("varbinary") || name.equals("image") || name.equals("varbinary(max)")){
+                } else if (name.equals("binary") || name.equals("varbinary") || name.equals("image") || name.equals("varbinary(max)")) {
                     name = "bytea";
                     tampered = true;
-                }else if(name.equals("ntext") || name.equals("nvarchar(max)") || name.equals("varchar(max)")){
+                } else if (name.equals("ntext") || name.equals("nvarchar(max)") || name.equals("varchar(max)")) {
                     name = "text";
                     tampered = true;
-                }else if(name.equals("uniqueidentifier")){
+                } else if (name.equals("uniqueidentifier")) {
                     name = "char(16)";
                     tampered = true;
-                }else if(name.equals("hierarchyid")){
+                } else if (name.equals("hierarchyid")) {
                     name = "varchar(4000)";
                     tampered = true;
-                }else if(name.equals("rowversion")){
+                } else if (name.equals("rowversion")) {
                     name = "timestamp(3)";
                     tampered = true;
-                }else if(name.equals("nvarchar")){
+                } else if (name.equals("nvarchar")) {
                     name = "varchar";
                 }
-                if(alias != null){
+                if (alias != null) {
                     query = "create domain " + alias + " as " + name;
-                    if(!tampered && name.contains("char")){
-                        query += "(" + atributos.get(i).getSize()+")";
+                    if (!tampered && name.contains("char")) {
+                        query += "(" + atributos.get(i).getSize() + ")";
                         tampered = true;
                     }
-                
+
                     postgre.createStatement().execute(query);
-                    
+
                     name = alias;
                 }
-                
+
                 create += atributos.get(i).getName() + " " + name;
-                if(name.contains("char") && !tampered){
-                    create += "(" + atributos.get(i).getSize()+")";
+                if (name.contains("char") && !tampered) {
+                    create += "(" + atributos.get(i).getSize() + ")";
                 }
-                if(!atributos.get(i).isIsNull()){
+                if (!atributos.get(i).isIsNull()) {
                     create += " not null";
                 }
-                if(atributos.get(i).isPrimaryKey()){
+                if (atributos.get(i).isPrimaryKey()) {
                     create += " primary key";
                 }
-                
-                if(atributos.get(i).isForeignKey()){
-                    create += " foreign key references " + atributos.get(i).getReference() + "("+atributos.get(i).getColumnafk()+")";
+
+                if (atributos.get(i).isForeignKey()) {
+                    end += " foreign key ("+nombre+") references " + atributos.get(i).getReference() + "(" + atributos.get(i).getColumnafk() + ")";
+
                 }
-                if(i != atributos.size()-1){
+                if (i != atributos.size() - 1) {
                     create += ",\n";
                     query = "";
-                }else{
+                } else if(!end.equals("")){
+                    create += ",\n";
+                    create += end;
+                }else {
                     create += "\n";
                 }
-                
+
                 query = "";
                 tampered = false;
             }
@@ -321,20 +555,95 @@ public class Admin {
             e.printStackTrace();
         }
         create += ")";
-        
-        try{
-           postgre.createStatement().execute(create);
+
+        try {
+            postgre.createStatement().execute(create);
             return true;
-        }catch(Exception e){
-           
+        } catch (Exception e) {
+
             return false;
         }
     }
+
     //replicar datos (server -> postgre)
-    private boolean replicarDatos1(String nombre, ArrayList<Atribute> atributos){
+    private boolean replicarDatos1(String schema, String nombre, ArrayList<Atribute> atributos, Date fecha) {
+        ResultSet rs;
+        try {
+
+            String formato = "YYYY-MM-dd HH:mm:ss:SS";
+            SimpleDateFormat format = new SimpleDateFormat(formato);
+            String tableName = "cdc." + schema + "_" + nombre + "_CT";
+            if (fecha == null) {
+                String query = "select * from " + tableName;
+
+                rs = sqlserver.createStatement().executeQuery(query);
+            } else {
+
+                String fecha1 = format.format(fecha);
+
+                String query = "select * from cdc.lsn_time_mapping t join cdc.dbo_tablaPrueba2_CT c on t.start_lsn = c.__$start_lsn where tran_begin_time > '" + fecha1 + "'";
+                rs = sqlserver.createStatement().executeQuery(query);
+
+            }
+            while (rs.next()) {
+                String sqlCode = "";
+                String operation = "";
+                //operaciones
+                int op = rs.getInt("__$operation");
+                if (op != 3) {
+                    switch (op) {
+                        case 1:
+                            //delete
+                            operation = "DELETE";
+                            sqlCode = "Delete from " + schema + "." + nombre + " where ";
+                            for (Atribute atributo : atributos) {
+                                if (atributo.isPrimaryKey()) {
+                                    sqlCode += atributo.getName() + "=" + rs.getString(atributo.getName());
+                                }
+                            }
+                            sqlCode += ";";
+
+                            break;
+                        case 2:
+                            operation = "INSERT";
+                            sqlCode = "Insert into " + schema + "." + nombre + " values (";
+                            for (int i = 0; i < atributos.size(); i++) {
+                                sqlCode += rs.getString(atributos.get(i).getName());
+                                if (i != atributos.size() - 1) {
+                                    sqlCode += ", ";
+                                }
+                            }
+                            sqlCode += ");";
+                            break;
+                        case 4:
+                            operation = "UPDATE";
+                            sqlCode = "Update " + schema + "." + nombre + " set ";
+                            for (int i = 0; i < atributos.size(); i++) {
+                                sqlCode += atributos.get(i).getName() + " = ";
+                                sqlCode += rs.getString(atributos.get(i).getName());
+                                if (i != atributos.size() - 1) {
+                                    sqlCode += ", ";
+                                }
+                            }
+                            for (Atribute atributo : atributos) {
+                                if (atributo.isPrimaryKey()) {
+                                    sqlCode += " where " + atributo.getName() + "=" + rs.getString(atributo.getName());
+                                }
+                            }
+                    }
+                    System.out.println();
+                    String query = String.format("Insert into replicationLog(operation,schema_object,table_object,sql_query,op_date) values ('%s', '%s', '%s', '%s', now());", operation, schema, nombre, sqlCode);
+                    postgre.createStatement().execute(query);
+                }
+            }
+            postgre.createStatement().execute("insert into replicationLog(operation,op_date) values ('end', now());");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
         return true;
     }
-    
+
     public void printSinReplicar() {
         for (int i = 0; i < tablasSinReplicar.size(); i++) {
             System.out.println(tablasSinReplicar.get(i));
