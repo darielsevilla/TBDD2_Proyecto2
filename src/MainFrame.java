@@ -33,14 +33,6 @@ public class MainFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        Job = new javax.swing.JDialog();
-        jPanel1 = new javax.swing.JPanel();
-        jLabel19 = new javax.swing.JLabel();
-        bt_replicar = new javax.swing.JPanel();
-        jLabel21 = new javax.swing.JLabel();
-        bt_tabla = new javax.swing.JPanel();
-        jLabel20 = new javax.swing.JLabel();
-        jLabel18 = new javax.swing.JLabel();
         Tablas = new javax.swing.JDialog();
         jPanel2 = new javax.swing.JPanel();
         jLabel23 = new javax.swing.JLabel();
@@ -92,62 +84,6 @@ public class MainFrame extends javax.swing.JFrame {
         jLabel15 = new javax.swing.JLabel();
         jLabel17 = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
-
-        Job.getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        jLabel19.setFont(new java.awt.Font("Segoe UI", 3, 24)); // NOI18N
-        jLabel19.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel19.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel19.setText("Job");
-        jPanel1.add(jLabel19, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 40, 400, -1));
-
-        bt_replicar.setBackground(new java.awt.Color(90, 3, 216));
-        bt_replicar.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                bt_replicarMouseEntered(evt);
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                bt_replicarMouseExited(evt);
-            }
-        });
-        bt_replicar.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        jLabel21.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabel21.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel21.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel21.setText("Replicar");
-        bt_replicar.add(jLabel21, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 100, -1));
-
-        jPanel1.add(bt_replicar, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 190, 100, 40));
-
-        bt_tabla.setBackground(new java.awt.Color(90, 3, 216));
-        bt_tabla.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                bt_tablaMouseClicked(evt);
-            }
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                bt_tablaMouseEntered(evt);
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                bt_tablaMouseExited(evt);
-            }
-        });
-        bt_tabla.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
-
-        jLabel20.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
-        jLabel20.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel20.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel20.setText("Elegir Tabla");
-        bt_tabla.add(jLabel20, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 120, -1));
-
-        jPanel1.add(bt_tabla, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 110, 120, 40));
-
-        jLabel18.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Fotos/fondo pequeño.png"))); // NOI18N
-        jPanel1.add(jLabel18, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
-
-        Job.getContentPane().add(jPanel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 400, 300));
 
         Tablas.getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -465,24 +401,8 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_bt_guardarMouseExited
 
     private void bt_guardarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_guardarMouseClicked
-        AbrirJD(Job);
+        AbrirJD(Tablas);
     }//GEN-LAST:event_bt_guardarMouseClicked
-
-    private void bt_tablaMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_tablaMouseEntered
-        bt_tabla.setBackground(new Color(68,212,229));
-    }//GEN-LAST:event_bt_tablaMouseEntered
-
-    private void bt_tablaMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_tablaMouseExited
-        bt_tabla.setBackground(new Color(90,3,216));
-    }//GEN-LAST:event_bt_tablaMouseExited
-
-    private void bt_replicarMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_replicarMouseEntered
-        bt_replicar.setBackground(new Color(68,212,229));
-    }//GEN-LAST:event_bt_replicarMouseEntered
-
-    private void bt_replicarMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_replicarMouseExited
-        bt_replicar.setBackground(new Color(90,3,216));
-    }//GEN-LAST:event_bt_replicarMouseExited
 
     private void bt_cancelarMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_cancelarMouseEntered
         bt_cancelar.setBackground(new Color(195,22,28));
@@ -515,10 +435,6 @@ public class MainFrame extends javax.swing.JFrame {
     private void bt_guardarTMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_guardarTMouseExited
         bt_guardarT.setBackground(new Color(90,3,216));
     }//GEN-LAST:event_bt_guardarTMouseExited
-
-    private void bt_tablaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_tablaMouseClicked
-        AbrirJD(Tablas);
-    }//GEN-LAST:event_bt_tablaMouseClicked
 
     private void bt_cancelarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_cancelarMouseClicked
         Tablas.setVisible(false);
@@ -569,7 +485,6 @@ public class MainFrame extends javax.swing.JFrame {
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel Fondo;
-    private javax.swing.JDialog Job;
     private javax.swing.JDialog Tablas;
     private javax.swing.JPanel bt_cancelar;
     private javax.swing.JPanel bt_guardar;
@@ -577,9 +492,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JPanel bt_left;
     private javax.swing.JPanel bt_probarD;
     private javax.swing.JPanel bt_probarO;
-    private javax.swing.JPanel bt_replicar;
     private javax.swing.JPanel bt_right;
-    private javax.swing.JPanel bt_tabla;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -589,11 +502,7 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
     private javax.swing.JLabel jLabel17;
-    private javax.swing.JLabel jLabel18;
-    private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel20;
-    private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel23;
     private javax.swing.JLabel jLabel24;
@@ -609,7 +518,6 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
