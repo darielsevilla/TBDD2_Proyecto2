@@ -115,10 +115,12 @@ public class Atribute {
         this.size = size;
     }
 
+ 
     @Override
     public String toString() {
-        return "Atribute{" + "name=" + name + ", foreignKey=" + foreignKey + ", primaryKey=" + primaryKey + ", isNull=" + isNull + ",\ndataType=" + dataType + ", reference=" + reference + ", size=" + size + ", alias=" + alias + ", precision=" + precision + '}';
+        return "Atribute{" + "name=" + name + ", foreignKey=" + foreignKey + ", primaryKey=" + primaryKey + ", isNull=" + isNull + ", dataType=" + dataType + ", reference=" + reference + ", size=" + size + ", alias=" + alias + ", precision=" + precision + ", columnafk=" + columnafk + '}';
     }
+   
     
     
     

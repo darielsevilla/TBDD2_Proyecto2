@@ -19,7 +19,8 @@ public class MainFrame extends javax.swing.JFrame {
         this.setLocationRelativeTo(null);
         this.setResizable(true);
         
-        admin = new Admin("Prueba", "AdventureWorks2022", "2606","1433","user1", "prueba1", "Emilio2606", "Emilio2606", 1);
+        //admin = new Admin("Prueba2", "Replicar", "2606","1433","user1", "prueba1", "Emilio2606", "Emilio2606", 2);
+        admin = new Admin("Prueba2", "pruebita", "2606","1433","user1", "prueba1", "Emilio2606", "Emilio2606", 2);
         admin.connect();
     }
 
