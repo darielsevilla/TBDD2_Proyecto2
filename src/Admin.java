@@ -23,12 +23,13 @@ public class Admin {
     private String puerto_postgre, puerto_sqlserver;
     private String user_postgre, user_sqlserver;
     private String pass_postgre, pass_sqlserver;
+    private String instancia_postgre, instancia_sql;
     private ArrayList<String> tablasReplicadas;
     private ArrayList<String> tablasSinReplicar;
     private int cual;
     private Connection postgre, sqlserver;
 
-    public Admin(String name_postgre, String name_sqlserver, String puerto_postgre, String puerto_sqlserver, String user_postgre, String user_sqlserver, String pass_postgre, String pass_sqlserver, int cual) {
+    public Admin(String instancia_postgre, String instancia_sql, String name_postgre, String name_sqlserver, String puerto_postgre, String puerto_sqlserver, String user_postgre, String user_sqlserver, String pass_postgre, String pass_sqlserver, int cual) {
 
         this.name_postgre = name_postgre;
         this.name_sqlserver = name_sqlserver;
@@ -41,6 +42,8 @@ public class Admin {
         this.cual = cual;
         tablasSinReplicar = new ArrayList<>();
         tablasReplicadas = new ArrayList<>();
+        this.instancia_postgre = instancia_postgre;
+        this.instancia_sql = instancia_sql;
         //credenciales postgres
         //username = postgres
         //password = Emilio2606
@@ -50,11 +53,10 @@ public class Admin {
 
     public boolean connect() {
         try {
-            postgre = DriverManager.getConnection("jdbc:postgresql://localhost:" + puerto_postgre + "/" + name_postgre, user_postgre, pass_postgre);
-            //sqlserver = DriverManager.getConnection("jdbc:sqlserver://localhost;encrypt=true;databaseName="+name_sqlserver+";user="+user_sqlserver+";password="+pass_sqlserver);
-            //sqlserver = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;databaseName="+name_sqlserver);
-            //String connectionUrl ="jdbc:sqlserver://localhost"+puerto_sqlserver+";database="+name_sqlserver+";user=" + user_sqlserver+ ";password="+pass_sqlserver+";encrypt=true;"+ "trustServerCertificate=false;" + "loginTimeout=30;";
-            sqlserver = DriverManager.getConnection("jdbc:sqlserver://localhost:" + puerto_sqlserver + ";database=" + name_sqlserver + ";user=" + user_sqlserver + ";password=" + pass_sqlserver + ";encrypt=true;" + "trustServerCertificate=true;" + "loginTimeout=30;");
+            //postgre = DriverManager.getConnection("jdbc:postgresql://localhost:" + puerto_postgre + "/" + name_postgre, user_postgre, pass_postgre);
+            //sqlserver = DriverManager.getConnection("jdbc:sqlserver://localhost:" + puerto_sqlserver + ";database=" + name_sqlserver + ";user=" + user_sqlserver + ";password=" + pass_sqlserver + ";encrypt=true;" + "trustServerCertificate=true;" + "loginTimeout=30;");
+            postgre = DriverManager.getConnection("jdbc:" + instancia_postgre+":" + puerto_postgre + "/" + name_postgre, user_postgre, pass_postgre);
+            sqlserver = DriverManager.getConnection("jdbc:"+instancia_sql+":" + puerto_sqlserver + ";database=" + name_sqlserver + ";user=" + user_sqlserver + ";password=" + pass_sqlserver + ";encrypt=true;" + "trustServerCertificate=true;" + "loginTimeout=30;");
             loadTablas();
 
             //this.printSinReplicar();
@@ -65,7 +67,7 @@ public class Admin {
             //replicarServerToPostgre();
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            
             return false;
         }
 
@@ -93,7 +95,7 @@ public class Admin {
                 ResultSet results = sqlserver.createStatement().executeQuery("select TABLE_SCHEMA, TABLE_NAME from INFORMATION_SCHEMA.TABLES");
                 while (results.next()) {
 
-                    if (!results.getString("TABLE_SCHEMA").equals("sys") && !results.getString("TABLE_SCHEMA").equals("cdc") && !results.getString("TABLE_NAME").equals("replicationLog") && !results.getString("TABLE_NAME").equals("systranschemas")) {
+                    if (!results.getString("TABLE_SCHEMA").equals("sys") && !results.getString("TABLE_SCHEMA").equals("cdc") && !results.getString("TABLE_NAME").equals("replicationlog") && !results.getString("TABLE_NAME").equals("systranschemas")) {
                         tablasSinReplicar.add(results.getString("TABLE_SCHEMA") + "." + results.getString("TABLE_NAME"));
                     }
                 }
@@ -111,10 +113,7 @@ public class Admin {
 
             }
             //cargar nombres de tablas de postre en sqlserver
-            this.printSinReplicar();
-            for (String tablas : tablasSinReplicar) {
-                this.replicarEstructura2(tablas, this.getAtributos_postgre(tablas));
-            }
+            
             this.printAtributos(this.getAtributos_postgre(tablasSinReplicar.get(2)));
         }
     }
