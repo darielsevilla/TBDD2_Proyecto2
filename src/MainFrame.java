@@ -1,9 +1,12 @@
 
 import java.awt.Color;
+import java.util.Date;
 import javax.swing.DefaultListModel;
 import javax.swing.JDialog;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import static javax.swing.JOptionPane.WARNING_MESSAGE;
+import javax.swing.JTextField;
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
@@ -18,6 +21,7 @@ public class MainFrame extends javax.swing.JFrame {
     String origen = null, destino = null;
     int type = 0;
     private Admin admin = null;
+    Date fecha = null;
 
     public MainFrame() {
         initComponents();
@@ -56,6 +60,8 @@ public class MainFrame extends javax.swing.JFrame {
         jLabel31 = new javax.swing.JLabel();
         bt_guardarT = new javax.swing.JPanel();
         jLabel32 = new javax.swing.JLabel();
+        FechaActual = new javax.swing.JLabel();
+        JLabel = new javax.swing.JLabel();
         jLabel22 = new javax.swing.JLabel();
         Fondo = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
@@ -157,7 +163,7 @@ public class MainFrame extends javax.swing.JFrame {
         jLabel30.setText("Cancelar");
         bt_cancelar.add(jLabel30, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 100, -1));
 
-        jPanel2.add(bt_cancelar, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 530, -1, 40));
+        jPanel2.add(bt_cancelar, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 530, -1, 40));
 
         jl_tablaR.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jl_tablaR.setModel(new DefaultListModel ());
@@ -213,7 +219,17 @@ public class MainFrame extends javax.swing.JFrame {
         jLabel32.setText("Guardar");
         bt_guardarT.add(jLabel32, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 100, -1));
 
-        jPanel2.add(bt_guardarT, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 530, -1, 40));
+        jPanel2.add(bt_guardarT, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 530, -1, 40));
+
+        FechaActual.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
+        FechaActual.setForeground(new java.awt.Color(255, 255, 255));
+        FechaActual.setText("Ninguna");
+        jPanel2.add(FechaActual, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 540, -1, -1));
+
+        JLabel.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
+        JLabel.setForeground(new java.awt.Color(255, 255, 255));
+        JLabel.setText("Última modificación:");
+        jPanel2.add(JLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 540, -1, -1));
 
         jLabel22.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Fotos/fondo 4.png"))); // NOI18N
         jPanel2.add(jLabel22, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
@@ -417,6 +433,9 @@ public class MainFrame extends javax.swing.JFrame {
         if (!ValidarMotores()) {
             JOptionPane.showMessageDialog(this, "¡No colocó bien los motores o están mal escritos!", "Warning", WARNING_MESSAGE);
         } else {
+            FormatearLista(jl_tablaSR);
+            FormatearLista(jl_tablaR);
+
             DefaultListModel tablaSR = (DefaultListModel) jl_tablaSR.getModel();
             tablaSR.addAll(admin.getTablasSinReplicar());
 
@@ -464,11 +483,16 @@ public class MainFrame extends javax.swing.JFrame {
         if (!ClasificarType(1)) {
             JOptionPane.showMessageDialog(this, "¡Error en el nombre de instancia!", "Warning", WARNING_MESSAGE);
         } else {
-            if (admin.test(tf_instanciaO.getText(), tf_puertoO.getText(), tf_BDO.getText(), tf_usuarioO.getText(), tf_contraO.getText(), type)) {
-                JOptionPane.showMessageDialog(this, "¡Prueba éxitosa!");
-            } else {
-                JOptionPane.showMessageDialog(this, "¡Prueba fallida!");
+            if (CheckingTextFields(tf_BDO.getText(), tf_puertoO.getText(), tf_usuarioO.getText(), tf_contraO.getText())) {//revisa si hay campos nulos
+                if (admin.test(tf_instanciaO.getText(), tf_puertoO.getText(), tf_BDO.getText(), tf_usuarioO.getText(), tf_contraO.getText(), type)) {//prueba la conexion
+                    JOptionPane.showMessageDialog(this, "¡Prueba éxitosa!");
+                } else {
+                    JOptionPane.showMessageDialog(this, "¡Prueba fallida!");
+                }
+            } else {//hay campos nulos
+                JOptionPane.showMessageDialog(this, "¡No se puede realizar la prueba! Hay al menos un campo sin texto.", "Warning", WARNING_MESSAGE);
             }
+
         }
     }//GEN-LAST:event_bt_probarOMouseClicked
 
@@ -476,10 +500,14 @@ public class MainFrame extends javax.swing.JFrame {
         if (!ClasificarType(2)) {
             JOptionPane.showMessageDialog(this, "¡Error en el nombre de instancia!", "Warning", WARNING_MESSAGE);
         } else {
-            if (admin.test(tf_instanciaD.getText(), tf_puertoD.getText(), tf_BDD.getText(), tf_usuarioD.getText(), tf_contraD.getText(), type)) {
-                JOptionPane.showMessageDialog(this, "¡Prueba éxitosa!");
-            } else {
-                JOptionPane.showMessageDialog(this, "¡Prueba fallida!");
+            if (CheckingTextFields(tf_BDD.getText(), tf_puertoD.getText(), tf_usuarioD.getText(), tf_contraD.getText())) {//revisa si hay campos nulos
+                if (admin.test(tf_instanciaD.getText(), tf_puertoD.getText(), tf_BDD.getText(), tf_usuarioD.getText(), tf_contraD.getText(), type)) {//prueba la conexion
+                    JOptionPane.showMessageDialog(this, "¡Prueba éxitosa!");
+                } else {
+                    JOptionPane.showMessageDialog(this, "¡Prueba fallida!");
+                }
+            } else {//hay campos nulos
+                JOptionPane.showMessageDialog(this, "¡No se puede realizar la prueba! Hay al menos un campo sin texto.", "Warning", WARNING_MESSAGE);
             }
         }
     }//GEN-LAST:event_bt_probarDMouseClicked
@@ -513,11 +541,32 @@ public class MainFrame extends javax.swing.JFrame {
     private void bt_guardarTMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_guardarTMouseClicked
         boolean funciono = false;
         if (admin.getCual() == 1) {
-            funciono = admin.replicarServerToPostgre(null);
+            funciono = admin.replicarServerToPostgre(fecha);
             //el null se va a cambiar por la date actual, si es la primera vez q se usa si va a ser null
         } else {
-            funciono = admin.replicarPostgreToServer(null);
+            funciono = admin.replicarPostgreToServer(fecha);
             //el null se va a cambiar por la date actual, si es la primera vez q se usa si va a ser null
+        }
+        fecha = new Date();
+        FechaActual.setText(fecha.toString());
+
+        //actualizar la lista de tablas sin replicar
+        DefaultListModel tablaSR = (DefaultListModel) jl_tablaSR.getModel();
+
+        admin.getTablasSinReplicar().clear();
+        for (int i = 0; i < tablaSR.getSize(); i++) {
+            admin.getTablasSinReplicar().add(tablaSR.getElementAt(i).toString());
+        }
+
+        //actualizar la lista de tablas replicadas
+        DefaultListModel tablaR = (DefaultListModel) jl_tablaR.getModel();
+
+        for (int i = 0; i < tablaR.getSize(); i++) {
+            admin.getTablasReplicadas().add(tablaR.getElementAt(i).toString());
+        }
+
+        for (int i = 0; i < admin.getTablasReplicadas().size(); i++) {
+            System.out.println(admin.getTablasReplicadas().get(i));
         }
     }//GEN-LAST:event_bt_guardarTMouseClicked
 
@@ -554,6 +603,25 @@ public class MainFrame extends javax.swing.JFrame {
                 new MainFrame().setVisible(true);
             }
         });
+    }
+
+    public void FormatearLista(JList lista) {
+        DefaultListModel modelo = (DefaultListModel) lista.getModel();
+        modelo.removeAllElements();
+    }
+
+    public boolean CheckingTextFields(String db, String port, String username, String pw) {
+        if (db.isEmpty()) {
+            return false;
+        } else if (port.isEmpty()) {
+            return false;
+        } else if (username.isEmpty()) {
+            return false;
+        } else if (pw.isEmpty()) {
+            return false;
+        }
+
+        return true;
     }
 
     public void AbrirJD(JDialog JD) {
@@ -614,7 +682,9 @@ public class MainFrame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel FechaActual;
     private javax.swing.JPanel Fondo;
+    private javax.swing.JLabel JLabel;
     private javax.swing.JDialog Tablas;
     private javax.swing.JPanel bt_cancelar;
     private javax.swing.JPanel bt_guardar;
