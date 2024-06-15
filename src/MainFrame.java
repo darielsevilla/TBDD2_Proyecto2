@@ -1,26 +1,32 @@
 
 import java.awt.Color;
+import javax.swing.DefaultListModel;
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
+import static javax.swing.JOptionPane.WARNING_MESSAGE;
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
-
 /**
  *
  * @author darie
  */
 public class MainFrame extends javax.swing.JFrame {
 
+    String origen = null, destino = null;
+    int type = 0;
     private Admin admin = null;
+
     public MainFrame() {
         initComponents();
         this.setLocationRelativeTo(null);
         this.setResizable(true);
-        
+
         //admin = new Admin("Prueba2", "Replicar", "2606","1433","user1", "prueba1", "Emilio2606", "Emilio2606", 2);
-        admin = new Admin("Prueba2", "pruebita", "2606","1433","user1", "prueba1", "Emilio2606", "Emilio2606", 2);
+//        admin = new Admin("Prueba2", "pruebita", "2606", "1433", "user1", "prueba1", "Emilio2606", "Emilio2606", 2);
+        admin = new Admin("baseandyor", "baseandyor", "5432", "1434", "postgres", "sa", "1234", "andyor", 1);
         admin.connect();
     }
 
@@ -111,6 +117,9 @@ public class MainFrame extends javax.swing.JFrame {
 
         bt_right.setBackground(new java.awt.Color(90, 3, 216));
         bt_right.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                bt_rightMouseClicked(evt);
+            }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 bt_rightMouseEntered(evt);
             }
@@ -151,27 +160,22 @@ public class MainFrame extends javax.swing.JFrame {
         jPanel2.add(bt_cancelar, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 530, -1, 40));
 
         jl_tablaR.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jl_tablaR.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
+        jl_tablaR.setModel(new DefaultListModel ());
         jScrollPane2.setViewportView(jl_tablaR);
 
         jPanel2.add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(550, 140, 290, 350));
 
         jl_tablaSR.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
-        jl_tablaSR.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
+        jl_tablaSR.setModel(new DefaultListModel ());
         jScrollPane1.setViewportView(jl_tablaSR);
 
         jPanel2.add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(60, 140, 290, 350));
 
         bt_left.setBackground(new java.awt.Color(90, 3, 216));
         bt_left.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                bt_leftMouseClicked(evt);
+            }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 bt_leftMouseEntered(evt);
             }
@@ -191,6 +195,9 @@ public class MainFrame extends javax.swing.JFrame {
 
         bt_guardarT.setBackground(new java.awt.Color(90, 3, 216));
         bt_guardarT.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                bt_guardarTMouseClicked(evt);
+            }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 bt_guardarTMouseEntered(evt);
             }
@@ -267,6 +274,9 @@ public class MainFrame extends javax.swing.JFrame {
 
         bt_probarD.setBackground(new java.awt.Color(79, 125, 254));
         bt_probarD.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                bt_probarDMouseClicked(evt);
+            }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 bt_probarDMouseEntered(evt);
             }
@@ -321,6 +331,9 @@ public class MainFrame extends javax.swing.JFrame {
 
         bt_probarO.setBackground(new java.awt.Color(79, 125, 254));
         bt_probarO.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                bt_probarOMouseClicked(evt);
+            }
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 bt_probarOMouseEntered(evt);
             }
@@ -377,68 +390,136 @@ public class MainFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void bt_probarOMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_probarOMouseEntered
-        bt_probarO.setBackground(new Color(68,212,229));
+        bt_probarO.setBackground(new Color(68, 212, 229));
     }//GEN-LAST:event_bt_probarOMouseEntered
 
     private void bt_probarOMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_probarOMouseExited
-        bt_probarO.setBackground(new Color(79,125,254));
+        bt_probarO.setBackground(new Color(79, 125, 254));
     }//GEN-LAST:event_bt_probarOMouseExited
 
     private void bt_probarDMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_probarDMouseEntered
-        bt_probarD.setBackground(new Color(68,212,229));
+        bt_probarD.setBackground(new Color(68, 212, 229));
     }//GEN-LAST:event_bt_probarDMouseEntered
 
     private void bt_probarDMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_probarDMouseExited
-        bt_probarD.setBackground(new Color(79,125,254));
+        bt_probarD.setBackground(new Color(79, 125, 254));
     }//GEN-LAST:event_bt_probarDMouseExited
 
     private void bt_guardarMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_guardarMouseEntered
-        bt_guardar.setBackground(new Color(3,216,90));
+        bt_guardar.setBackground(new Color(3, 216, 90));
     }//GEN-LAST:event_bt_guardarMouseEntered
 
     private void bt_guardarMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_guardarMouseExited
-        bt_guardar.setBackground(new Color(90,3,216));
+        bt_guardar.setBackground(new Color(90, 3, 216));
     }//GEN-LAST:event_bt_guardarMouseExited
 
     private void bt_guardarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_guardarMouseClicked
-        AbrirJD(Tablas);
+        if (!ValidarMotores()) {
+            JOptionPane.showMessageDialog(this, "¡No colocó bien los motores o están mal escritos!", "Warning", WARNING_MESSAGE);
+        } else {
+            DefaultListModel tablaSR = (DefaultListModel) jl_tablaSR.getModel();
+            tablaSR.addAll(admin.getTablasSinReplicar());
+
+            AbrirJD(Tablas);
+        }
     }//GEN-LAST:event_bt_guardarMouseClicked
 
     private void bt_cancelarMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_cancelarMouseEntered
-        bt_cancelar.setBackground(new Color(195,22,28));
+        bt_cancelar.setBackground(new Color(195, 22, 28));
     }//GEN-LAST:event_bt_cancelarMouseEntered
 
     private void bt_cancelarMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_cancelarMouseExited
-        bt_cancelar.setBackground(new Color(90,3,216));
+        bt_cancelar.setBackground(new Color(90, 3, 216));
     }//GEN-LAST:event_bt_cancelarMouseExited
 
     private void bt_rightMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_rightMouseEntered
-        bt_right.setBackground(new Color(68,212,229));
+        bt_right.setBackground(new Color(68, 212, 229));
     }//GEN-LAST:event_bt_rightMouseEntered
 
     private void bt_rightMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_rightMouseExited
-        bt_right.setBackground(new Color(90,3,216));
+        bt_right.setBackground(new Color(90, 3, 216));
     }//GEN-LAST:event_bt_rightMouseExited
 
     private void bt_leftMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_leftMouseEntered
-        bt_left.setBackground(new Color(68,212,229));
+        bt_left.setBackground(new Color(68, 212, 229));
     }//GEN-LAST:event_bt_leftMouseEntered
 
     private void bt_leftMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_leftMouseExited
-        bt_left.setBackground(new Color(90,3,216));
+        bt_left.setBackground(new Color(90, 3, 216));
     }//GEN-LAST:event_bt_leftMouseExited
 
     private void bt_guardarTMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_guardarTMouseEntered
-        bt_guardarT.setBackground(new Color(3,216,90));
+        bt_guardarT.setBackground(new Color(3, 216, 90));
     }//GEN-LAST:event_bt_guardarTMouseEntered
 
     private void bt_guardarTMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_guardarTMouseExited
-        bt_guardarT.setBackground(new Color(90,3,216));
+        bt_guardarT.setBackground(new Color(90, 3, 216));
     }//GEN-LAST:event_bt_guardarTMouseExited
 
     private void bt_cancelarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_cancelarMouseClicked
         Tablas.setVisible(false);
     }//GEN-LAST:event_bt_cancelarMouseClicked
+
+    private void bt_probarOMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_probarOMouseClicked
+        if (!ClasificarType(1)) {
+            JOptionPane.showMessageDialog(this, "¡Error en el nombre de instancia!", "Warning", WARNING_MESSAGE);
+        } else {
+            if (admin.test(tf_instanciaO.getText(), tf_puertoO.getText(), tf_BDO.getText(), tf_usuarioO.getText(), tf_contraO.getText(), type)) {
+                JOptionPane.showMessageDialog(this, "¡Prueba éxitosa!");
+            } else {
+                JOptionPane.showMessageDialog(this, "¡Prueba fallida!");
+            }
+        }
+    }//GEN-LAST:event_bt_probarOMouseClicked
+
+    private void bt_probarDMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_probarDMouseClicked
+        if (!ClasificarType(2)) {
+            JOptionPane.showMessageDialog(this, "¡Error en el nombre de instancia!", "Warning", WARNING_MESSAGE);
+        } else {
+            if (admin.test(tf_instanciaD.getText(), tf_puertoD.getText(), tf_BDD.getText(), tf_usuarioD.getText(), tf_contraD.getText(), type)) {
+                JOptionPane.showMessageDialog(this, "¡Prueba éxitosa!");
+            } else {
+                JOptionPane.showMessageDialog(this, "¡Prueba fallida!");
+            }
+        }
+    }//GEN-LAST:event_bt_probarDMouseClicked
+
+    private void bt_rightMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_rightMouseClicked
+        DefaultListModel tablaSR = (DefaultListModel) jl_tablaSR.getModel();
+        DefaultListModel tablaR = (DefaultListModel) jl_tablaR.getModel();
+
+        int index = jl_tablaSR.getSelectedIndex();
+        if (index > -1) {
+            tablaR.addElement(tablaSR.get(index));
+            tablaSR.remove(index);
+        } else {
+            JOptionPane.showMessageDialog(this, "¡No hay ninguna tabla seleccionada!", "Warning", WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_bt_rightMouseClicked
+
+    private void bt_leftMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_leftMouseClicked
+        DefaultListModel tablaSR = (DefaultListModel) jl_tablaSR.getModel();
+        DefaultListModel tablaR = (DefaultListModel) jl_tablaR.getModel();
+
+        int index = jl_tablaR.getSelectedIndex();
+        if (index > -1) {
+            tablaSR.addElement(tablaR.get(index));
+            tablaR.remove(index);
+        } else {
+            JOptionPane.showMessageDialog(this, "¡No hay ninguna tabla seleccionada!", "Warning", WARNING_MESSAGE);
+        }
+    }//GEN-LAST:event_bt_leftMouseClicked
+
+    private void bt_guardarTMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_guardarTMouseClicked
+        boolean funciono = false;
+        if (admin.getCual() == 1) {
+            funciono = admin.replicarServerToPostgre(null);
+            //el null se va a cambiar por la date actual, si es la primera vez q se usa si va a ser null
+        } else {
+            funciono = admin.replicarPostgreToServer(null);
+            //el null se va a cambiar por la date actual, si es la primera vez q se usa si va a ser null
+        }
+    }//GEN-LAST:event_bt_guardarTMouseClicked
 
     /**
      * @param args the command line arguments
@@ -475,14 +556,63 @@ public class MainFrame extends javax.swing.JFrame {
         });
     }
 
-    public static void AbrirJD(JDialog JD) {
+    public void AbrirJD(JDialog JD) {
         JD.setModal(true);
         JD.pack();
         JD.setLocationRelativeTo(null);
         JD.setResizable(false);
         JD.setVisible(true);
     }
-    
+
+    public boolean ClasificarType(int clasif) {
+        if (clasif == 1) {//origen
+            if (tf_instanciaO.getText().contains("postgresql")) {
+                origen = "postgresql";
+                type = 2;
+                return true;
+            } else if (tf_instanciaO.getText().contains("sqlserver")) {
+                origen = "sqlserver";
+                type = 1;
+                return true;
+            } else {
+                return false;
+            }
+
+        } else {//destino
+            if (tf_instanciaD.getText().contains("postgresql")) {
+                destino = "postgresql";
+                type = 2;
+                return true;
+            } else if (tf_instanciaD.getText().contains("sqlserver")) {
+                destino = "sqlserver";
+                type = 1;
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    public boolean ValidarMotores() {
+        boolean flag;
+
+        //validar motor de origen
+        flag = ClasificarType(1);
+
+        //validar motor de destino
+        flag = ClasificarType(2);
+
+        if (origen == null || destino == null) {
+            flag = false;
+        } else if ("postgresql".equals(origen) && "postgresql".equals(destino)) {
+            flag = false;
+        } else if ("sqlserver".equals(origen) && "sqlserver".equals(destino)) {
+            flag = false;
+        }
+
+        return flag;
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel Fondo;
     private javax.swing.JDialog Tablas;
