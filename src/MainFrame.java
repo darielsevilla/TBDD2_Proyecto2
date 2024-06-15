@@ -1,10 +1,15 @@
 
 import java.awt.Color;
+
 import java.sql.DriverManager;
+import java.util.Date;
+
 import javax.swing.DefaultListModel;
 import javax.swing.JDialog;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import static javax.swing.JOptionPane.WARNING_MESSAGE;
+import javax.swing.JTextField;
 
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
@@ -19,6 +24,7 @@ public class MainFrame extends javax.swing.JFrame {
     String origen = null, destino = null;
     int type = 0;
     private Admin admin = null;
+    Date fecha = null;
 
     public MainFrame() {
         initComponents();
@@ -57,6 +63,8 @@ public class MainFrame extends javax.swing.JFrame {
         jLabel31 = new javax.swing.JLabel();
         bt_guardarT = new javax.swing.JPanel();
         jLabel32 = new javax.swing.JLabel();
+        FechaActual = new javax.swing.JLabel();
+        JLabel = new javax.swing.JLabel();
         jLabel22 = new javax.swing.JLabel();
         Fondo = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
@@ -158,7 +166,7 @@ public class MainFrame extends javax.swing.JFrame {
         jLabel30.setText("Cancelar");
         bt_cancelar.add(jLabel30, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 100, -1));
 
-        jPanel2.add(bt_cancelar, new org.netbeans.lib.awtextra.AbsoluteConstraints(480, 530, -1, 40));
+        jPanel2.add(bt_cancelar, new org.netbeans.lib.awtextra.AbsoluteConstraints(300, 530, -1, 40));
 
         jl_tablaR.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         jl_tablaR.setModel(new DefaultListModel ());
@@ -214,7 +222,17 @@ public class MainFrame extends javax.swing.JFrame {
         jLabel32.setText("Guardar");
         bt_guardarT.add(jLabel32, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 100, -1));
 
-        jPanel2.add(bt_guardarT, new org.netbeans.lib.awtextra.AbsoluteConstraints(320, 530, -1, 40));
+        jPanel2.add(bt_guardarT, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 530, -1, 40));
+
+        FechaActual.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
+        FechaActual.setForeground(new java.awt.Color(255, 255, 255));
+        FechaActual.setText("Ninguna");
+        jPanel2.add(FechaActual, new org.netbeans.lib.awtextra.AbsoluteConstraints(610, 540, -1, -1));
+
+        JLabel.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
+        JLabel.setForeground(new java.awt.Color(255, 255, 255));
+        JLabel.setText("Última modificación:");
+        jPanel2.add(JLabel, new org.netbeans.lib.awtextra.AbsoluteConstraints(450, 540, -1, -1));
 
         jLabel22.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Fotos/fondo 4.png"))); // NOI18N
         jPanel2.add(jLabel22, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, -1, -1));
@@ -421,6 +439,7 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_bt_guardarMouseExited
 
     private void bt_guardarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_guardarMouseClicked
+
         type = 3;
         if (ValidarMotores()) {
             if (tf_instanciaO.getText().contains("postresql")) {
@@ -438,6 +457,7 @@ public class MainFrame extends javax.swing.JFrame {
             } else {
                 JOptionPane.showMessageDialog(this, "¡No colocó bien los motores o están mal escritos!", "Warning", WARNING_MESSAGE);
             }
+
             DefaultListModel tablaSR = (DefaultListModel) jl_tablaSR.getModel();
             tablaSR.addAll(admin.getTablasSinReplicar());
 
@@ -485,11 +505,13 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_bt_cancelarMouseClicked
 
     private void bt_probarOMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_probarOMouseClicked
+
         int num2 = 0;
         if (tf_instanciaO.getText().contains("sqlserver")) {
             num2 = 1;
         } else if (tf_instanciaO.getText().contains("postgresql")) {
             num2 = 2;
+
         }
         if (num2 != 0) {
             if (test(tf_instanciaO.getText(), tf_BDO.getText(), tf_puertoO.getText(), tf_usuarioO.getText(), tf_contraO.getText(), num2)) {
@@ -504,12 +526,14 @@ public class MainFrame extends javax.swing.JFrame {
 
     }//GEN-LAST:event_bt_probarOMouseClicked
 
+
     public boolean test(String instancia, String base, String puerto, String usuario, String pw, int type) {
         try {
             if (type == 1) {//sqlserver
                 DriverManager.getConnection("jdbc:" + instancia + ":" + puerto + ";database=" + base + ";user=" + usuario + ";password=" + pw + ";encrypt=true;" + "trustServerCertificate=true;" + "loginTimeout=30;");
             } else {
                 DriverManager.getConnection("jdbc:" + instancia + ":" + puerto + "/" + base, usuario, pw);//postgres
+
             }
             return true;
         } catch (Exception e) {
@@ -566,11 +590,32 @@ public class MainFrame extends javax.swing.JFrame {
     private void bt_guardarTMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_guardarTMouseClicked
         boolean funciono = false;
         if (admin.getCual() == 1) {
-            funciono = admin.replicarServerToPostgre(null);
+            funciono = admin.replicarServerToPostgre(fecha);
             //el null se va a cambiar por la date actual, si es la primera vez q se usa si va a ser null
         } else {
-            funciono = admin.replicarPostgreToServer(null);
+            funciono = admin.replicarPostgreToServer(fecha);
             //el null se va a cambiar por la date actual, si es la primera vez q se usa si va a ser null
+        }
+        fecha = new Date();
+        FechaActual.setText(fecha.toString());
+
+        //actualizar la lista de tablas sin replicar
+        DefaultListModel tablaSR = (DefaultListModel) jl_tablaSR.getModel();
+
+        admin.getTablasSinReplicar().clear();
+        for (int i = 0; i < tablaSR.getSize(); i++) {
+            admin.getTablasSinReplicar().add(tablaSR.getElementAt(i).toString());
+        }
+
+        //actualizar la lista de tablas replicadas
+        DefaultListModel tablaR = (DefaultListModel) jl_tablaR.getModel();
+
+        for (int i = 0; i < tablaR.getSize(); i++) {
+            admin.getTablasReplicadas().add(tablaR.getElementAt(i).toString());
+        }
+
+        for (int i = 0; i < admin.getTablasReplicadas().size(); i++) {
+            System.out.println(admin.getTablasReplicadas().get(i));
         }
     }//GEN-LAST:event_bt_guardarTMouseClicked
 
@@ -611,6 +656,25 @@ public class MainFrame extends javax.swing.JFrame {
                 new MainFrame().setVisible(true);
             }
         });
+    }
+
+    public void FormatearLista(JList lista) {
+        DefaultListModel modelo = (DefaultListModel) lista.getModel();
+        modelo.removeAllElements();
+    }
+
+    public boolean CheckingTextFields(String db, String port, String username, String pw) {
+        if (db.isEmpty()) {
+            return false;
+        } else if (port.isEmpty()) {
+            return false;
+        } else if (username.isEmpty()) {
+            return false;
+        } else if (pw.isEmpty()) {
+            return false;
+        }
+
+        return true;
     }
 
     public void AbrirJD(JDialog JD) {
@@ -675,7 +739,9 @@ public class MainFrame extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel FechaActual;
     private javax.swing.JPanel Fondo;
+    private javax.swing.JLabel JLabel;
     private javax.swing.JDialog Tablas;
     private javax.swing.JPanel bt_cancelar;
     private javax.swing.JPanel bt_guardar;
