@@ -50,14 +50,13 @@ public class Admin {
 
     public boolean connect() {
         try {
-
             postgre = DriverManager.getConnection("jdbc:postgresql://localhost:" + puerto_postgre + "/" + name_postgre, user_postgre, pass_postgre);
             //sqlserver = DriverManager.getConnection("jdbc:sqlserver://localhost;encrypt=true;databaseName="+name_sqlserver+";user="+user_sqlserver+";password="+pass_sqlserver);
             //sqlserver = DriverManager.getConnection("jdbc:sqlserver://localhost:1433;databaseName="+name_sqlserver);
             //String connectionUrl ="jdbc:sqlserver://localhost"+puerto_sqlserver+";database="+name_sqlserver+";user=" + user_sqlserver+ ";password="+pass_sqlserver+";encrypt=true;"+ "trustServerCertificate=false;" + "loginTimeout=30;";
             sqlserver = DriverManager.getConnection("jdbc:sqlserver://localhost:" + puerto_sqlserver + ";database=" + name_sqlserver + ";user=" + user_sqlserver + ";password=" + pass_sqlserver + ";encrypt=true;" + "trustServerCertificate=true;" + "loginTimeout=30;");
             loadTablas();
-            
+
             //this.printSinReplicar();
             //System.out.println(this.tablasSinReplicar.get(8));
             //this.tablasReplicadas.add(this.tablasSinReplicar.get(8));
@@ -72,14 +71,31 @@ public class Admin {
 
     }
 
+    public boolean test(String instancia, String puerto, String base, String usuario, String pw, int type) {
+        try {
+            if (type == 1) {//sqlserver
+                DriverManager.getConnection("jdbc:" + instancia + ":" + puerto + ";database=" + base + ";user=" + usuario + ";password=" + pw + ";encrypt=true;" + "trustServerCertificate=true;" + "loginTimeout=30;");
+            } else {
+                DriverManager.getConnection("jdbc:" + instancia + ":" + puerto + "/" + base, usuario, pw);//postgres
+            }
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+
+    }
+
     public void loadTablas() {
         if (cual == 1) {
             //cargar nombres de tablas de sqlserver en postgre
             try {
                 ResultSet results = sqlserver.createStatement().executeQuery("select TABLE_SCHEMA, TABLE_NAME from INFORMATION_SCHEMA.TABLES");
                 while (results.next()) {
-                    tablasSinReplicar.add(results.getString("TABLE_SCHEMA") + "." + results.getString("TABLE_NAME"));
 
+                    if (!results.getString("TABLE_SCHEMA").equals("sys") && !results.getString("TABLE_SCHEMA").equals("cdc") && !results.getString("TABLE_NAME").equals("replicationLog") && !results.getString("TABLE_NAME").equals("systranschemas")) {
+                        tablasSinReplicar.add(results.getString("TABLE_SCHEMA") + "." + results.getString("TABLE_NAME"));
+                    }
                 }
             } catch (Exception e) {
 
@@ -89,7 +105,7 @@ public class Admin {
                 ResultSet results = postgre.createStatement().executeQuery("select table_name, table_schema from information_schema.tables where table_schema != 'information_schema' and table_schema != 'pg_catalog'");
                 while (results.next()) {
                     tablasSinReplicar.add(results.getString("table_schema") + "." + results.getString("table_name"));
-                    
+
                 }
             } catch (Exception e) {
 
@@ -97,7 +113,7 @@ public class Admin {
             //cargar nombres de tablas de postre en sqlserver
             this.printSinReplicar();
             for (String tablas : tablasSinReplicar) {
-               this.replicarEstructura2(tablas, this.getAtributos_postgre(tablas));
+                this.replicarEstructura2(tablas, this.getAtributos_postgre(tablas));
             }
             this.printAtributos(this.getAtributos_postgre(tablasSinReplicar.get(2)));
         }
@@ -197,6 +213,30 @@ public class Admin {
         return atributos;
     }
 
+    public ArrayList<String> getTablasReplicadas() {
+        return tablasReplicadas;
+    }
+
+    public int getCual() {
+        return cual;
+    }
+
+    public void setCual(int cual) {
+        this.cual = cual;
+    }
+
+    public void setTablasReplicadas(ArrayList<String> tablasReplicadas) {
+        this.tablasReplicadas = tablasReplicadas;
+    }
+
+    public ArrayList<String> getTablasSinReplicar() {
+        return tablasSinReplicar;
+    }
+
+    public void setTablasSinReplicar(ArrayList<String> tablasSinReplicar) {
+        this.tablasSinReplicar = tablasSinReplicar;
+    }
+
     public ArrayList<Atribute> getAtributos_postgre(String table) {
         ArrayList<Atribute> atributos = new ArrayList<>();
         String schema = "public";
@@ -220,10 +260,10 @@ public class Admin {
         try {
             ResultSet keys = postgre.createStatement().executeQuery(pKeys);
             String pKName = "";
-            if(keys.next()){
+            if (keys.next()) {
                 pKName = keys.getString("column_name");
             }
-            
+
             ResultSet rs = postgre.createStatement().executeQuery(attQuery);
             //boolean foreignKey, String reference,String alias, String columnafk)
             while (rs.next()) {
@@ -268,20 +308,20 @@ public class Admin {
                         + "JOIN information_schema.constraint_column_usage AS ccu\n"
                         + "    ON ccu.constraint_name = tc.constraint_name\n"
                         + "WHERE tc.constraint_type = 'FOREIGN KEY'\n"
-                        + "    AND tc.table_schema='"+schema+"'\n"
-                        + "    AND tc.table_name='"+tabla+"'\n"
-                        + "	AND kcu.column_name = '"+name+"';";
-                
+                        + "    AND tc.table_schema='" + schema + "'\n"
+                        + "    AND tc.table_name='" + tabla + "'\n"
+                        + "	AND kcu.column_name = '" + name + "';";
+
                 ResultSet fk = postgre.createStatement().executeQuery(sql);
-                if(fk.next()){
+                if (fk.next()) {
                     fkey = true;
                     reference = fk.getString("foreign_table_name");
                     columnafk = fk.getString("foreign_column_name");
                 }
-                
+
                 //chequeo de alias
-                ResultSet domain = postgre.createStatement().executeQuery("select * from information_schema.domains where domain_name = '"+name+"';");
-                if(domain.next()){
+                ResultSet domain = postgre.createStatement().executeQuery("select * from information_schema.domains where domain_name = '" + name + "';");
+                if (domain.next()) {
                     alias = name;
                     name = domain.getString("udt_name");
                 }
@@ -295,20 +335,20 @@ public class Admin {
     }
 
     public boolean replicarPostgreToServer(Date date) {
-       
+
         return true;
     }
 
-    public boolean replicarEstructura2(String nombre, ArrayList<Atribute> atributos){
-       
-       String[] split = nombre.replace('.', '-').split("-");
-       if(split.length == 2){
-           if(split[0].equals("public")){
-               System.out.println(split[0]);
-               System.out.println(split[1]);
-               nombre =split[1];
-           }
-       }
+    public boolean replicarEstructura2(String nombre, ArrayList<Atribute> atributos) {
+
+        String[] split = nombre.replace('.', '-').split("-");
+        if (split.length == 2) {
+            if (split[0].equals("public")) {
+                System.out.println(split[0]);
+                System.out.println(split[1]);
+                nombre = split[1];
+            }
+        }
         String create = "create table " + nombre + "(";
         ResultSet existe;
         String query = "";
@@ -327,20 +367,18 @@ public class Admin {
                     if (existe.next()) {
                         name = alias;
                         alias = null;
-                   
 
                     }
                 }
 
-                if(name.equals("int4")){
+                if (name.equals("int4")) {
                     name = "int";
                     tampered = true;
-                }else if(name.equals("float8")){
+                } else if (name.equals("float8")) {
                     name = "float";
                     tampered = true;
                 }
-                
-                
+
                 if (alias != null) {
                     query = "create domain " + alias + " as " + name;
                     if (!tampered && name.contains("char")) {
@@ -355,9 +393,9 @@ public class Admin {
 
                 create += atributos.get(i).getName() + " " + name;
                 if (name.contains("char") && !tampered) {
-                    if(atributos.get(i).getSize() != 0){
-                    create += "(" + atributos.get(i).getSize() + ")";
-                    }else{
+                    if (atributos.get(i).getSize() != 0) {
+                        create += "(" + atributos.get(i).getSize() + ")";
+                    } else {
                         create += "(max)";
                     }
                 }
@@ -369,16 +407,16 @@ public class Admin {
                 }
 
                 if (atributos.get(i).isForeignKey()) {
-                    end += " foreign key (" +nombre +") references " + atributos.get(i).getReference() + "(" + atributos.get(i).getColumnafk() + ")";
+                    end += " foreign key (" + nombre + ") references " + atributos.get(i).getReference() + "(" + atributos.get(i).getColumnafk() + ")";
 
                 }
                 if (i != atributos.size() - 1) {
                     create += ",\n";
                     query = "";
-                } else if(!end.equals("")){
+                } else if (!end.equals("")) {
                     create += ",\n";
                     create += end;
-                }else{
+                } else {
                     create += "\n";
                 }
 
@@ -399,6 +437,7 @@ public class Admin {
             return false;
         }
     }
+
     //replicación sql server a postgre
     public boolean replicarServerToPostgre(Date date) {
         try {
@@ -440,7 +479,7 @@ public class Admin {
 
                 }
 
-                //repica datos
+                //replica datos
                 return replicarDatos1(schema, name, atributos, date);
             }
 
@@ -535,16 +574,16 @@ public class Admin {
                 }
 
                 if (atributos.get(i).isForeignKey()) {
-                    end += " foreign key ("+nombre+") references " + atributos.get(i).getReference() + "(" + atributos.get(i).getColumnafk() + ")";
+                    end += " foreign key (" + nombre + ") references " + atributos.get(i).getReference() + "(" + atributos.get(i).getColumnafk() + ")";
 
                 }
                 if (i != atributos.size() - 1) {
                     create += ",\n";
                     query = "";
-                } else if(!end.equals("")){
+                } else if (!end.equals("")) {
                     create += ",\n";
                     create += end;
-                }else {
+                } else {
                     create += "\n";
                 }
 
