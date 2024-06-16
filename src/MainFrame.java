@@ -219,6 +219,11 @@ public class MainFrame extends javax.swing.JFrame {
         jLabel32.setForeground(new java.awt.Color(255, 255, 255));
         jLabel32.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel32.setText("Guardar");
+        jLabel32.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel32MouseClicked(evt);
+            }
+        });
         bt_guardarT.add(jLabel32, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 100, -1));
 
         jPanel2.add(bt_guardarT, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 530, -1, 40));
@@ -406,6 +411,11 @@ public class MainFrame extends javax.swing.JFrame {
         Fondo.add(jLabel17, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 30, 900, 30));
 
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Fotos/fondo 4.png"))); // NOI18N
+        jLabel1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jLabel1MouseClicked(evt);
+            }
+        });
         Fondo.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 900, -1));
 
         getContentPane().add(Fondo, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 900, 600));
@@ -438,25 +448,36 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_bt_guardarMouseExited
 
     private void bt_guardarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_guardarMouseClicked
+
        if (ValidarMotores()) {
             boolean validado = true;
             if (typeO == 2) {//si la base origen es postgres
                 admin = new Admin(tf_instanciaO.getText(), tf_instanciaD.getText(), tf_BDO.getText(), tf_BDD.getText(), tf_puertoO.getText(), tf_puertoD.getText(), tf_usuarioO.getText(), tf_usuarioD.getText(), tf_contraO.getText(), tf_contraD.getText(), 2);
                 validado = admin.connect();
             } else if (typeD == 1) {//si la base de origen es sqlserver
+
                 admin = new Admin(tf_instanciaD.getText(), tf_instanciaO.getText(), tf_BDD.getText(), tf_BDO.getText(), tf_puertoD.getText(), tf_puertoO.getText(), tf_usuarioD.getText(), tf_usuarioO.getText(), tf_contraD.getText(), tf_contraO.getText(), 1);
                 validado =admin.connect();
             } else {
                 JOptionPane.showMessageDialog(this, "¡No colocó bien los motores o están mal escritos!", "Warning", WARNING_MESSAGE);
             }
-            
+
             if(validado){
+               
                 DefaultListModel tablaSR = (DefaultListModel) jl_tablaSR.getModel();
                 tablaSR.addAll(admin.getTablasSinReplicar());
                 AbrirJD(Tablas);
+             
             }else{
-                JOptionPane.showMessageDialog(this, "Conexión fallida", "Warning", WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Conexion fallida", "Warning", WARNING_MESSAGE);
             }
+            
+
+            
+        } else {
+
+            JOptionPane.showMessageDialog(this, "¡No colocó bien los motores o están mal escritos!", "Warning", WARNING_MESSAGE);
+
         }
     }//GEN-LAST:event_bt_guardarMouseClicked
 
@@ -528,7 +549,6 @@ public class MainFrame extends javax.swing.JFrame {
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
             return false;
         }
 
@@ -560,9 +580,11 @@ public class MainFrame extends javax.swing.JFrame {
     private void bt_rightMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_rightMouseClicked
         DefaultListModel tablaSR = (DefaultListModel) jl_tablaSR.getModel();
         DefaultListModel tablaR = (DefaultListModel) jl_tablaR.getModel();
-
+        
         int index = jl_tablaSR.getSelectedIndex();
         if (index > -1) {
+            admin.getTablasSinReplicar().remove(tablaSR.get(index).toString());
+            admin.getTablasReplicadas().add(tablaSR.get(index).toString());
             tablaR.addElement(tablaSR.get(index));
             tablaSR.remove(index);
         } else {
@@ -576,6 +598,8 @@ public class MainFrame extends javax.swing.JFrame {
 
         int index = jl_tablaR.getSelectedIndex();
         if (index > -1) {
+            admin.getTablasSinReplicar().add(tablaR.get(index).toString());
+            admin.getTablasReplicadas().remove(tablaR.get(index).toString());
             tablaSR.addElement(tablaR.get(index));
             tablaR.remove(index);
         } else {
@@ -585,6 +609,7 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void bt_guardarTMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_guardarTMouseClicked
         boolean funciono = false;
+
         if (admin.getCual() == 1) {
             funciono = admin.replicarServerToPostgre(fecha);
             //el null se va a cambiar por la date actual, si es la primera vez q se usa si va a ser null
@@ -592,9 +617,16 @@ public class MainFrame extends javax.swing.JFrame {
             funciono = admin.replicarPostgreToServer(fecha);
             //el null se va a cambiar por la date actual, si es la primera vez q se usa si va a ser null
         }
-        fecha = new Date();
-        FechaActual.setText(fecha.toString());
-
+        
+        if(funciono){
+            JOptionPane.showMessageDialog(this, "La base se replico exitosamente");
+            fecha = new Date();
+            FechaActual.setText(fecha.toString());
+        }else{
+            JOptionPane.showMessageDialog(this, "La base no se replico");
+        }
+        
+        /*
         //actualizar la lista de tablas sin replicar
         DefaultListModel tablaSR = (DefaultListModel) jl_tablaSR.getModel();
 
@@ -613,11 +645,20 @@ public class MainFrame extends javax.swing.JFrame {
         for (int i = 0; i < admin.getTablasReplicadas().size(); i++) {
             System.out.println(admin.getTablasReplicadas().get(i));
         }
+        */
     }//GEN-LAST:event_bt_guardarTMouseClicked
 
     private void tf_usuarioOActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tf_usuarioOActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_tf_usuarioOActionPerformed
+
+    private void jLabel1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel1MouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jLabel1MouseClicked
+
+    private void jLabel32MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel32MouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jLabel32MouseClicked
 
     /**
      * @param args the command line arguments
@@ -720,13 +761,13 @@ public class MainFrame extends javax.swing.JFrame {
         flag = ClasificarType(2);
 
         if (origen == null || destino == null) {
-            System.out.println("1");
+            
             flag = false;
         } else if ("postgresql".equals(origen) && "postgresql".equals(destino)) {
-            System.out.println("2");
+     
             flag = false;
         } else if ("sqlserver".equals(origen) && "sqlserver".equals(destino)) {
-            System.out.println("3");
+        
             flag = false;
         }
 

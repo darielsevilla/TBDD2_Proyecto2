@@ -55,11 +55,11 @@ public class Admin {
         try {
             //postgre = DriverManager.getConnection("jdbc:postgresql://localhost:" + puerto_postgre + "/" + name_postgre, user_postgre, pass_postgre);
             //sqlserver = DriverManager.getConnection("jdbc:sqlserver://localhost:" + puerto_sqlserver + ";database=" + name_sqlserver + ";user=" + user_sqlserver + ";password=" + pass_sqlserver + ";encrypt=true;" + "trustServerCertificate=true;" + "loginTimeout=30;");
-            postgre = DriverManager.getConnection("jdbc:" + instancia_postgre+":" + puerto_postgre + "/" + name_postgre, user_postgre, pass_postgre);
-            sqlserver = DriverManager.getConnection("jdbc:"+instancia_sql+":" + puerto_sqlserver + ";database=" + name_sqlserver + ";user=" + user_sqlserver + ";password=" + pass_sqlserver + ";encrypt=true;" + "trustServerCertificate=true;" + "loginTimeout=30;");
+            postgre = DriverManager.getConnection("jdbc:" + instancia_postgre + ":" + puerto_postgre + "/" + name_postgre, user_postgre, pass_postgre);
+            sqlserver = DriverManager.getConnection("jdbc:" + instancia_sql + ":" + puerto_sqlserver + ";database=" + name_sqlserver + ";user=" + user_sqlserver + ";password=" + pass_sqlserver + ";encrypt=true;" + "trustServerCertificate=true;" + "loginTimeout=30;");
             loadTablas();
 
-            //this.printSinReplicar();
+            this.printSinReplicar();
             //System.out.println(this.tablasSinReplicar.get(8));
             //this.tablasReplicadas.add(this.tablasSinReplicar.get(8));
             //System.out.println(this.replicarServerToPostgre(null));
@@ -67,22 +67,7 @@ public class Admin {
             //replicarServerToPostgre();
             return true;
         } catch (Exception e) {
-            
-            return false;
-        }
 
-    }
-
-    public boolean test(String instancia, String puerto, String base, String usuario, String pw, int type) {
-        try {
-            if (type == 1) {//sqlserver
-                DriverManager.getConnection("jdbc:" + instancia + ":" + puerto + ";database=" + base + ";user=" + usuario + ";password=" + pw + ";encrypt=true;" + "trustServerCertificate=true;" + "loginTimeout=30;");
-            } else {
-                DriverManager.getConnection("jdbc:" + instancia + ":" + puerto + "/" + base, usuario, pw);//postgres
-            }
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
             return false;
         }
 
@@ -113,8 +98,7 @@ public class Admin {
 
             }
             //cargar nombres de tablas de postre en sqlserver
-            
-            this.printAtributos(this.getAtributos_postgre(tablasSinReplicar.get(2)));
+
         }
     }
 
@@ -177,28 +161,52 @@ public class Admin {
                 }
                 //revisa si es foreign key
                 String llaveForanea = "SELECT f.name AS foreign_key_name,\n"
-                        + "    OBJECT_NAME(f.parent_object_id) AS table_name,\n"
-                        + "    COL_NAME(fc.parent_object_id, fc.parent_column_id) AS constraint_column_name,\n"
-                        + "    OBJECT_NAME(f.referenced_object_id) AS referenced_object,\n"
-                        + "    COL_NAME(fc.referenced_object_id, fc.referenced_column_id) AS referenced_column_name\n"
-                        + "FROM sys.foreign_keys AS f\n"
-                        + "INNER JOIN sys.foreign_key_columns AS fc\n"
-                        + "    ON f.object_id = fc.constraint_object_id\n"
-                        + "WHERE f.parent_object_id = OBJECT_ID('HumanResources.Employee') AND COL_NAME(fc.parent_object_id, fc.parent_column_id) = '" + nombre + "';";
+                        + "                            OBJECT_NAME(f.parent_object_id) AS table_name,\n"
+                        + "							OBJECT_SCHEMA_NAME(f.parent_object_id) as schemaName,\n"
+                        + "                            COL_NAME(fc.parent_object_id, fc.parent_column_id) AS constraint_column_name,\n"
+                        + "							OBJECT_SCHEMA_NAME(f.referenced_object_id) as schemaReference,\n"
+                        + "                            OBJECT_NAME(f.referenced_object_id) AS referenced_object,\n"
+                        + "                            COL_NAME(fc.referenced_object_id, fc.referenced_column_id) AS referenced_column_name\n"
+                        + "                        FROM sys.foreign_keys AS f\n"
+                        + "                        INNER JOIN sys.foreign_key_columns AS fc\n"
+                        + "                            ON f.object_id = fc.constraint_object_id\n"
+                        + "                        WHERE f.parent_object_id = OBJECT_ID('" + table + "') AND COL_NAME(fc.parent_object_id, fc.parent_column_id) = '" + nombre + "';\n"
+                        + "				";
                 ResultSet foranea = sqlserver.createStatement().executeQuery(llaveForanea);
                 String rCol = null;
                 while (foranea.next()) {
+
                     isFK = true;
-                    reference = foranea.getString("table_name");
+                    String schemaa = foranea.getString("schemaReference");
+                    reference = foranea.getString("referenced_object");
+
                     rCol = foranea.getString("referenced_column_name");
                     boolean isThere = false;
                     for (String str : this.tablasReplicadas) {
+                        String s_name = "dbo";
+                        String t_name = str;
+                        String[] array = str.replace('.', '-').split("-");
 
-                        if (str.equals(reference)) {
-                            isThere = true;
+                        //separar el nombre del esquema 
+                        if (array.length > 1) {
+                            //verificar si el esquema existe
+
+                            s_name = array[0];
+                            t_name = array[1];
                         }
+                        System.out.println("");
+
+                        if (s_name.equals(schemaa) && t_name.equals(reference)) {
+                            isThere = true;
+                            reference = s_name + "." + t_name;
+                            break;
+                        }
+
+                        //System.out.println(nombre+"----");
+                        //System.out.println(reference);
                     }
                     if (!isThere) {
+
                         return null;
                     }
                 }
@@ -314,7 +322,7 @@ public class Admin {
                 ResultSet fk = postgre.createStatement().executeQuery(sql);
                 if (fk.next()) {
                     fkey = true;
-                    reference = fk.getString("foreign_table_name");
+                    reference = fk.getString("foreign_table_schema") + "." + fk.getString("foreign_table_name");
                     columnafk = fk.getString("foreign_column_name");
                 }
 
@@ -334,8 +342,62 @@ public class Admin {
     }
 
     public boolean replicarPostgreToServer(Date date) {
+        try {
 
+            ArrayList<Atribute> atributos;
+            if (!reorderListPostgres()) {
+
+                return false;
+            }
+            ResultSet existe;
+            for (int i = 0; i < tablasReplicadas.size(); i++) {
+                //verificar si la tabla existe
+
+                atributos = getAtributos_postgre(tablasReplicadas.get(i));
+                if (atributos == null) {
+                    return false;
+                }
+                String schema = "dbo";
+                String name = "";
+
+                String[] array = tablasReplicadas.get(i).replace('.', '-').split("-");
+
+                //separar el nombre del esquema 
+                if (array.length > 1) {
+                    //verificar si el esquema existe
+                    if (!array[0].equals("public")) {
+                        schema = array[0];
+                    }
+                    name = array[1];
+                    String schemaqueue = "select schema_name from information_schema.schemata where schema_name = '" + schema + "';";
+                    existe = sqlserver.createStatement().executeQuery(schemaqueue);
+                    if (!existe.next()) {
+                        //si no existe se crea
+                        sqlserver.createStatement().execute("create schema " + schema);
+                    }
+                } else {
+                    name = array[0];
+                }
+                //ahora verifica si la tabla existe
+                existe = sqlserver.createStatement().executeQuery("select table_name from information_schema.tables where table_name = '" + name + "' and table_schema = '" + schema + "';");
+                //si la tabla no existe la crea
+
+                if (!existe.next()) {
+                    boolean replicate = replicarEstructura2(tablasReplicadas.get(i), atributos);
+
+                }
+
+                //replica datos
+                if (!replicarDatos2(schema, name, date)) {
+                    return false;
+                }
+            }
+
+        } catch (SQLException ex) {
+            Logger.getLogger(Admin.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return true;
+
     }
 
     public boolean replicarEstructura2(String nombre, ArrayList<Atribute> atributos) {
@@ -343,8 +405,7 @@ public class Admin {
         String[] split = nombre.replace('.', '-').split("-");
         if (split.length == 2) {
             if (split[0].equals("public")) {
-                System.out.println(split[0]);
-                System.out.println(split[1]);
+
                 nombre = split[1];
             }
         }
@@ -360,7 +421,7 @@ public class Admin {
                 String alias = atributos.get(i).getAlias();
                 if (alias != null) {
                     String queueAlias = "select typname from pg_type where typname = '" + alias.toLowerCase() + "'";
-                    System.out.println(alias);
+
                     existe = postgre.createStatement().executeQuery(queueAlias);
                     //si el alias ya existe es q o es un tipo de dato en postgre o ya fue definido
                     if (existe.next()) {
@@ -437,13 +498,159 @@ public class Admin {
         }
     }
 
+    public boolean reorderListServer() {
+        try {
+            boolean done = false;
+            do {
+                done = true;
+                for (int i = 0; i < this.tablasReplicadas.size(); i++) {
+                    int currentPos = i;
+                    String llaveForanea = "SELECT f.name AS foreign_key_name,\n"
+                            + "                            OBJECT_NAME(f.parent_object_id) AS table_name,\n"
+                            + "							OBJECT_SCHEMA_NAME(f.parent_object_id) as schemaName,\n"
+                            + "                            COL_NAME(fc.parent_object_id, fc.parent_column_id) AS constraint_column_name,\n"
+                            + "							OBJECT_SCHEMA_NAME(f.referenced_object_id) as schemaReference,\n"
+                            + "                            OBJECT_NAME(f.referenced_object_id) AS referenced_object,\n"
+                            + "                            COL_NAME(fc.referenced_object_id, fc.referenced_column_id) AS referenced_column_name\n"
+                            + "                        FROM sys.foreign_keys AS f\n"
+                            + "                        INNER JOIN sys.foreign_key_columns AS fc\n"
+                            + "                            ON f.object_id = fc.constraint_object_id\n"
+                            + "                        WHERE f.parent_object_id = OBJECT_ID('" + tablasReplicadas.get(i) + "');";
+                    ResultSet result = sqlserver.createStatement().executeQuery(llaveForanea);
+                    while (result.next()) {
+
+                        String nameReference = result.getString("schemaReference") + "." + result.getString("referenced_object");
+                        boolean foreign = false;
+                        for (int j = 0; j < this.tablasReplicadas.size(); j++) {
+                            String actual = this.tablasReplicadas.get(j);
+                            if (actual.equals(nameReference)) {
+                                foreign = true;
+                                //System.out.println(tablasReplicadas.get(currentPos));
+                                //System.out.println("j: " + j);
+                                //System.out.println("cp: " + currentPos);
+
+                                if (j > currentPos) {
+                                    System.out.println("new pos: " + (j + 1));
+                                    this.tablasReplicadas.add(j + 1, this.tablasReplicadas.get(currentPos));
+                                    this.tablasReplicadas.remove(currentPos);
+                                    done = false;
+                                    if (currentPos == i) {
+                                        i--;
+                                    }
+                                    currentPos = j;
+                                }
+
+                                break;
+                            }
+                        }
+                        if (!foreign) {
+                            return false;
+                        }
+                    }
+                }
+
+            } while (!done);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+
+    }
+
+    public boolean reorderListPostgres() {
+        try {
+            boolean done = false;
+            do {
+                done = true;
+                for (int i = 0; i < this.tablasReplicadas.size(); i++) {
+                    int currentPos = i;
+                    String schema = "public";
+                    String tabla = this.tablasReplicadas.get(i);
+                    String[] array = tablasReplicadas.get(i).replace('.', '-').split("-");
+
+                    //separar el nombre del esquema 
+                    if (array.length > 1) {
+                        //verificar si el esquema existe
+                        schema = array[0];
+                        tabla = array[1];
+
+                    }
+                    //foreign key
+                    String sql = "SELECT\n"
+                            + "    tc.table_schema, \n"
+                            + "    tc.constraint_name, \n"
+                            + "    tc.table_name, \n"
+                            + "    kcu.column_name, \n"
+                            + "    ccu.table_schema AS foreign_table_schema,\n"
+                            + "    ccu.table_name AS foreign_table_name,\n"
+                            + "    ccu.column_name AS foreign_column_name \n"
+                            + "FROM information_schema.table_constraints AS tc \n"
+                            + "JOIN information_schema.key_column_usage AS kcu\n"
+                            + "    ON tc.constraint_name = kcu.constraint_name\n"
+                            + "    AND tc.table_schema = kcu.table_schema\n"
+                            + "JOIN information_schema.constraint_column_usage AS ccu\n"
+                            + "    ON ccu.constraint_name = tc.constraint_name\n"
+                            + "WHERE tc.constraint_type = 'FOREIGN KEY'\n"
+                            + "    AND tc.table_schema='" + schema + "'\n"
+                            + "    AND tc.table_name='" + tabla + "'\n";
+
+                    ResultSet result = sqlserver.createStatement().executeQuery(sql);
+                    while (result.next()) {
+
+                        String nameReference = result.getString("foreign_table_schema") + "." + result.getString("foreign_table_name");
+                        boolean foreign = false;
+                        for (int j = 0; j < this.tablasReplicadas.size(); j++) {
+                            String actual = this.tablasReplicadas.get(j);
+                            if (actual.equals(nameReference)) {
+                                foreign = true;
+                                //System.out.println(tablasReplicadas.get(currentPos));
+                                //System.out.println("j: " + j);
+                                //System.out.println("cp: " + currentPos);
+
+                                if (j > currentPos) {
+                                    System.out.println("new pos: " + (j + 1));
+                                    this.tablasReplicadas.add(j + 1, this.tablasReplicadas.get(currentPos));
+                                    this.tablasReplicadas.remove(currentPos);
+                                    done = false;
+                                    if (currentPos == i) {
+                                        i--;
+                                    }
+                                    currentPos = j;
+                                }
+
+                                break;
+                            }
+                        }
+                        if (!foreign) {
+                            return false;
+                        }
+                    }
+                }
+
+            } while (!done);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+
+    }
     //replicación sql server a postgre
+
     public boolean replicarServerToPostgre(Date date) {
         try {
+
             ArrayList<Atribute> atributos;
+            if (!reorderListServer()) {
+                this.printReplicar();
+                return false;
+            }
+            this.printReplicar();
             ResultSet existe;
             for (int i = 0; i < tablasReplicadas.size(); i++) {
                 //verificar si la tabla existe
+
                 atributos = getAtributos_sqlserver(tablasReplicadas.get(i));
                 if (atributos == null) {
 
@@ -451,14 +658,15 @@ public class Admin {
                 }
                 String schema = "public";
                 String name = "";
-                System.out.println(tablasReplicadas.get(i));
+
                 String[] array = tablasReplicadas.get(i).replace('.', '-').split("-");
 
                 //separar el nombre del esquema 
                 if (array.length > 1) {
                     //verificar si el esquema existe
-
-                    schema = array[0];
+                    if (!array[0].equals("dbo")) {
+                        schema = array[0];
+                    }
                     name = array[1];
                     String schemaqueue = "SELECT schema_name FROM information_schema.schemata WHERE schema_name ='" + schema.toLowerCase() + "';";
                     existe = postgre.createStatement().executeQuery(schemaqueue);
@@ -470,18 +678,23 @@ public class Admin {
                     name = array[0];
                 }
                 //ahora verifica si la tabla existe
-                existe = postgre.createStatement().executeQuery("select table_name from information_schema.tables where table_name = '" + name + "' and table_schema = '" + schema + "'");
+                existe = postgre.createStatement().executeQuery("select table_name from information_schema.tables where table_name = '" + name + "' and table_schema = '" + schema.replace("public.", "dbo.") + "'");
                 //si la tabla no existe la crea
 
                 if (!existe.next()) {
                     boolean replicate = replicarEstructura1(tablasReplicadas.get(i), atributos);
 
                 }
-
+                if (schema.equals("public")) {
+                    schema = "dbo";
+                }
                 //replica datos
-                return replicarDatos1(schema, name, atributos, date);
+                if (!replicarDatos1(schema, name, atributos, date)) {
+                    return false;
+                }
+                
             }
-
+            postgre.createStatement().execute("insert into replicationLog(operation,op_date) values ('end', now());");
         } catch (SQLException ex) {
             Logger.getLogger(Admin.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -490,7 +703,19 @@ public class Admin {
 
     //replicación de la estructura de la tabla en si (server -> postgre)
     private boolean replicarEstructura1(String nombre, ArrayList<Atribute> atributos) {
-        String create = "create table " + nombre + "(";
+        String tableName = nombre;
+
+        String[] array = nombre.replace('.', '-').split("-");
+
+        //separar el nombre del esquema 
+        if (array.length > 1) {
+            //verificar si el esquema existe
+            if (array[0].equals("dbo")) {
+                tableName = array[1];
+            }
+
+        }
+        String create = "create table " + tableName + "(";
         ResultSet existe;
         String query = "";
         String end = "";
@@ -502,13 +727,12 @@ public class Admin {
                 String alias = atributos.get(i).getAlias();
                 if (alias != null) {
                     String queueAlias = "select typname from pg_type where typname = '" + alias.toLowerCase() + "'";
-                    System.out.println(alias);
+
                     existe = postgre.createStatement().executeQuery(queueAlias);
                     //si el alias ya existe es q o es un tipo de dato en postgre o ya fue definido
                     if (existe.next()) {
                         name = alias;
                         alias = null;
-                        System.out.println("entra");
 
                     }
                 }
@@ -573,7 +797,9 @@ public class Admin {
                 }
 
                 if (atributos.get(i).isForeignKey()) {
-                    end += " foreign key (" + nombre + ") references " + atributos.get(i).getReference() + "(" + atributos.get(i).getColumnafk() + ")";
+                    if (!end.equals("")) {
+                        end += ",";
+                    }
 
                 }
                 if (i != atributos.size() - 1) {
@@ -593,7 +819,9 @@ public class Admin {
             e.printStackTrace();
         }
         create += ")";
-
+        System.out.println("------------------");
+        System.out.println(create);
+        System.out.println("------------------");
         try {
             postgre.createStatement().execute(create);
             return true;
@@ -603,9 +831,36 @@ public class Admin {
         }
     }
 
+    private boolean replicarDatos2(String schema, String nombre, Date fecha) {
+        ResultSet rs;
+        try {
+            String formato = "YYYY-MM-dd HH:mm:ss:SS";
+            SimpleDateFormat format = new SimpleDateFormat(formato);
+            if (fecha == null) {
+                String query = "select * from bitacora where schema_object='" + schema + "' and table_object='" + nombre + "';";
+                rs = postgre.createStatement().executeQuery(query);
+            } else {
+                String fecha1 = format.format(fecha);
+                String query = "select * from bitacora where schema_object='" + schema + "' and table_object='" + nombre + "' and tran_begin_time > '" + fecha1 + "'";
+                rs = postgre.createStatement().executeQuery(query);
+
+            }
+
+            while (rs.next()) {
+                rs = sqlserver.createStatement().executeQuery("select count(op_id) as c from replicationLog");
+                int id = rs.getInt("c") + 1;
+                String query = String.format("insert into replicationLog(op_id, operation, schema_object, table_object, sql_query) values (%d,'%s','&s','%s','%s')",id, rs.getString("operation"), rs.getString("schema_object"), rs.getString("table_object"), rs.getString("sql_query"));
+            }
+        } catch (Exception e) {
+
+        }
+        return true;
+    }
+
     //replicar datos (server -> postgre)
     private boolean replicarDatos1(String schema, String nombre, ArrayList<Atribute> atributos, Date fecha) {
         ResultSet rs;
+        int cont = 0;
         try {
 
             String formato = "YYYY-MM-dd HH:mm:ss:SS";
@@ -613,13 +868,13 @@ public class Admin {
             String tableName = "cdc." + schema + "_" + nombre + "_CT";
             if (fecha == null) {
                 String query = "select * from " + tableName;
-
+                System.out.println("replicarDatos1 null");
                 rs = sqlserver.createStatement().executeQuery(query);
             } else {
 
                 String fecha1 = format.format(fecha);
 
-                String query = "select * from cdc.lsn_time_mapping t join cdc.dbo_tablaPrueba2_CT c on t.start_lsn = c.__$start_lsn where tran_begin_time > '" + fecha1 + "'";
+                String query = "select * from cdc.lsn_time_mapping t join " + tableName + " c on t.start_lsn = c.__$start_lsn where tran_begin_time > '" + fecha1 + "'";
                 rs = sqlserver.createStatement().executeQuery(query);
 
             }
@@ -636,7 +891,13 @@ public class Admin {
                             sqlCode = "Delete from " + schema + "." + nombre + " where ";
                             for (Atribute atributo : atributos) {
                                 if (atributo.isPrimaryKey()) {
-                                    sqlCode += atributo.getName() + "=" + rs.getString(atributo.getName());
+
+                                    sqlCode += atributo.getName() + " = ";
+                                    if (atributo.getDataType().contains("char")) {
+                                        sqlCode += "''" + rs.getString(atributo.getName()) + "''";
+                                    } else {
+                                        sqlCode += rs.getString(atributo.getName());
+                                    }
                                 }
                             }
                             sqlCode += ";";
@@ -646,8 +907,14 @@ public class Admin {
                             operation = "INSERT";
                             sqlCode = "Insert into " + schema + "." + nombre + " values (";
                             for (int i = 0; i < atributos.size(); i++) {
-                                sqlCode += rs.getString(atributos.get(i).getName());
+                                if (atributos.get(i).getDataType().contains("char")) {
+                                    sqlCode += "''" + rs.getString(atributos.get(i).getName()) + "''";
+                                } else {
+                                    sqlCode += rs.getString(atributos.get(i).getName());
+                                }
+
                                 if (i != atributos.size() - 1) {
+
                                     sqlCode += ", ";
                                 }
                             }
@@ -658,7 +925,11 @@ public class Admin {
                             sqlCode = "Update " + schema + "." + nombre + " set ";
                             for (int i = 0; i < atributos.size(); i++) {
                                 sqlCode += atributos.get(i).getName() + " = ";
-                                sqlCode += rs.getString(atributos.get(i).getName());
+                                if (atributos.get(i).getDataType().contains("char")) {
+                                    sqlCode += "''" + rs.getString(atributos.get(i).getName()) + "''";
+                                } else {
+                                    sqlCode += rs.getString(atributos.get(i).getName());
+                                }
                                 if (i != atributos.size() - 1) {
                                     sqlCode += ", ";
                                 }
@@ -671,10 +942,14 @@ public class Admin {
                     }
                     System.out.println();
                     String query = String.format("Insert into replicationLog(operation,schema_object,table_object,sql_query,op_date) values ('%s', '%s', '%s', '%s', now());", operation, schema, nombre, sqlCode);
+                    cont++;
                     postgre.createStatement().execute(query);
                 }
             }
-            postgre.createStatement().execute("insert into replicationLog(operation,op_date) values ('end', now());");
+            
+            
+            
+
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -685,6 +960,12 @@ public class Admin {
     public void printSinReplicar() {
         for (int i = 0; i < tablasSinReplicar.size(); i++) {
             System.out.println(tablasSinReplicar.get(i));
+        }
+    }
+
+    public void printReplicar() {
+        for (int i = 0; i < tablasReplicadas.size(); i++) {
+            System.out.println(tablasReplicadas.get(i));
         }
     }
 
