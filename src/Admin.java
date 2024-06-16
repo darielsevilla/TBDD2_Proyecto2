@@ -388,7 +388,7 @@ public class Admin {
                 }
 
                 //replica datos
-                if (!replicarDatos2(schema, name, atributos, date)) {
+                if (!replicarDatos2(schema, name, date)) {
                     return false;
                 }
             }

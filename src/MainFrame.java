@@ -22,7 +22,7 @@ import javax.swing.JTextField;
 public class MainFrame extends javax.swing.JFrame {
 
     String origen = null, destino = null;
-    int type = 0;
+    int typeO = 0, typeD = 0;
     private Admin admin = null;
     Date fecha = null;
 
@@ -34,7 +34,6 @@ public class MainFrame extends javax.swing.JFrame {
         //admin = new Admin("Prueba2", "Replicar", "2606","1433","user1", "prueba1", "Emilio2606", "Emilio2606", 2);
         //admin = new Admin("postgresql://localhost", "sqlserver://localhost","Prueba2", "pruebita", "2606", "1433", "user1", "prueba1", "Emilio2606", "Emilio2606", 2);
         // admin = new Admin("baseandyor", "baseandyor", "5432", "1434", "postgres", "sa", "1234", "andyor", 1);
-        //admin.connect();
     }
 
     /**
@@ -450,24 +449,19 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void bt_guardarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_guardarMouseClicked
 
-        type = 3;
-        if (ValidarMotores()) {
-            if (tf_instanciaO.getText().contains("postgresql")) {
-                type = 2;
-            } else {
-                type = 1;
-            }
+       if (ValidarMotores()) {
             boolean validado = true;
-            if (type == 2) {
-       
+            if (typeO == 2) {//si la base origen es postgres
                 admin = new Admin(tf_instanciaO.getText(), tf_instanciaD.getText(), tf_BDO.getText(), tf_BDD.getText(), tf_puertoO.getText(), tf_puertoD.getText(), tf_usuarioO.getText(), tf_usuarioD.getText(), tf_contraO.getText(), tf_contraD.getText(), 2);
                 validado = admin.connect();
-            } else if (type == 1) {
+            } else if (typeD == 1) {//si la base de origen es sqlserver
+
                 admin = new Admin(tf_instanciaD.getText(), tf_instanciaO.getText(), tf_BDD.getText(), tf_BDO.getText(), tf_puertoD.getText(), tf_puertoO.getText(), tf_usuarioD.getText(), tf_usuarioO.getText(), tf_contraD.getText(), tf_contraO.getText(), 1);
                 validado =admin.connect();
             } else {
                 JOptionPane.showMessageDialog(this, "¡No colocó bien los motores o están mal escritos!", "Warning", WARNING_MESSAGE);
             }
+
             if(validado){
                
                 DefaultListModel tablaSR = (DefaultListModel) jl_tablaSR.getModel();
@@ -483,6 +477,7 @@ public class MainFrame extends javax.swing.JFrame {
         } else {
 
             JOptionPane.showMessageDialog(this, "¡No colocó bien los motores o están mal escritos!", "Warning", WARNING_MESSAGE);
+
         }
     }//GEN-LAST:event_bt_guardarMouseClicked
 
@@ -523,27 +518,26 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_bt_cancelarMouseClicked
 
     private void bt_probarOMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_probarOMouseClicked
-
-        int num2 = 0;
-        if (tf_instanciaO.getText().contains("sqlserver")) {
-            num2 = 1;
-        } else if (tf_instanciaO.getText().contains("postgresql")) {
-            num2 = 2;
-
-        }
-        if (num2 != 0) {
-            if (test(tf_instanciaO.getText(), tf_BDO.getText(), tf_puertoO.getText(), tf_usuarioO.getText(), tf_contraO.getText(), num2)) {
-                JOptionPane.showMessageDialog(this, "Se conecto exitosamente");
-            } else {
-                JOptionPane.showMessageDialog(this, "No se pudo conectar");
+//        int num2 = 0;
+//        if (tf_instanciaO.getText().contains("sqlserver")) {
+//            num2 = 1;
+//        } else if (tf_instanciaO.getText().contains("postgresql")) {
+//            num2 = 2;
+//        }
+        if (!ClasificarType(1)) {
+            JOptionPane.showMessageDialog(this, "¡Error en el nombre de instancia!", "Warning", WARNING_MESSAGE);
+        } else {
+            if (CheckingTextFields(tf_BDO.getText(), tf_puertoO.getText(), tf_usuarioO.getText(), tf_contraO.getText())) {//revisa si hay campos nulos
+                if (test(tf_instanciaO.getText(), tf_BDO.getText(), tf_puertoO.getText(), tf_usuarioO.getText(), tf_contraO.getText(), typeO)) {
+                    JOptionPane.showMessageDialog(this, "¡Prueba éxitosa!");
+                } else {
+                    JOptionPane.showMessageDialog(this, "¡Prueba fallida!");
+                }
+            }else {//hay campos nulos
+                JOptionPane.showMessageDialog(this, "¡No se puede realizar la prueba! Hay al menos un campo sin texto.", "Warning", WARNING_MESSAGE);
             }
-        }else{
-            JOptionPane.showMessageDialog(this, "Valores incorrectos");
         }
-
-
     }//GEN-LAST:event_bt_probarOMouseClicked
-
 
     public boolean test(String instancia, String base, String puerto, String usuario, String pw, int type) {
         try {
@@ -561,20 +555,25 @@ public class MainFrame extends javax.swing.JFrame {
     }
 
     private void bt_probarDMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_probarDMouseClicked
-        int num2 = 0;
-        if (tf_instanciaD.getText().contains("sqlserver")) {
-            num2 = 1;
-        } else if (tf_instanciaD.getText().contains("postgresql")) {
-            num2 = 2;
-        }
-        if (num2 != 0) {
-            if (test(tf_instanciaD.getText(), tf_BDD.getText(), tf_puertoD.getText(), tf_usuarioD.getText(), tf_contraD.getText(), num2)) {
-                JOptionPane.showMessageDialog(this, "Se conecto exitosamente");
-            } else {
-                JOptionPane.showMessageDialog(this, "No se pudo conectar");
+//        int num2 = 0;
+//        if (tf_instanciaD.getText().contains("sqlserver")) {
+//            num2 = 1;
+//        } else if (tf_instanciaD.getText().contains("postgresql")) {
+//            num2 = 2;
+//        }
+
+        if (!ClasificarType(2)) {
+            JOptionPane.showMessageDialog(this, "¡Error en el nombre de instancia!", "Warning", WARNING_MESSAGE);
+        } else {
+            if (CheckingTextFields(tf_BDD.getText(), tf_puertoD.getText(), tf_usuarioD.getText(), tf_contraD.getText())) {//revisa si hay campos nulos
+                if (test(tf_instanciaD.getText(), tf_BDD.getText(), tf_puertoD.getText(), tf_usuarioD.getText(), tf_contraD.getText(), typeD)) {
+                    JOptionPane.showMessageDialog(this, "¡Prueba éxitosa!");
+                } else {
+                    JOptionPane.showMessageDialog(this, "¡Prueba fallida!");
+                }
+            }else {//hay campos nulos
+                JOptionPane.showMessageDialog(this, "¡No se puede realizar la prueba! Hay al menos un campo sin texto.", "Warning", WARNING_MESSAGE);
             }
-        }else{
-            JOptionPane.showMessageDialog(this, "Valores incorrectos");
         }
     }//GEN-LAST:event_bt_probarDMouseClicked
 
@@ -727,12 +726,11 @@ public class MainFrame extends javax.swing.JFrame {
         if (clasif == 1) {//origen
             if (tf_instanciaO.getText().contains("postgresql")) {
                 origen = "postgresql";
-                type = 2;
+                typeO = 2;
                 return true;
             } else if (tf_instanciaO.getText().contains("sqlserver")) {
                 origen = "sqlserver";
-
-                type = 1;
+                typeO = 1;
                 return true;
             } else {
                 return false;
@@ -741,11 +739,11 @@ public class MainFrame extends javax.swing.JFrame {
         } else {//destino
             if (tf_instanciaD.getText().contains("postgresql")) {
                 destino = "postgresql";
-
+                typeD = 2;
                 return true;
             } else if (tf_instanciaD.getText().contains("sqlserver")) {
                 destino = "sqlserver";
-
+                typeD = 1;
                 return true;
             } else {
                 return false;
@@ -753,7 +751,7 @@ public class MainFrame extends javax.swing.JFrame {
         }
     }
 
-    public boolean ValidarMotores() {
+    public boolean ValidarMotores() {//valida si hay un motor diferente en cada base
         boolean flag;
 
         //validar motor de origen
