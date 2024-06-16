@@ -465,6 +465,9 @@ public class MainFrame extends javax.swing.JFrame {
             if(validado){
                
                 DefaultListModel tablaSR = (DefaultListModel) jl_tablaSR.getModel();
+                tablaSR.clear();
+                DefaultListModel tablaR = (DefaultListModel) jl_tablaR.getModel();
+                tablaR.clear();
                 tablaSR.addAll(admin.getTablasSinReplicar());
                 AbrirJD(Tablas);
              

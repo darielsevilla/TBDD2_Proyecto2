@@ -59,7 +59,7 @@ public class Admin {
             sqlserver = DriverManager.getConnection("jdbc:" + instancia_sql + ":" + puerto_sqlserver + ";database=" + name_sqlserver + ";user=" + user_sqlserver + ";password=" + pass_sqlserver + ";encrypt=true;" + "trustServerCertificate=true;" + "loginTimeout=30;");
             loadTablas();
 
-            this.printSinReplicar();
+            
             //System.out.println(this.tablasSinReplicar.get(8));
             //this.tablasReplicadas.add(this.tablasSinReplicar.get(8));
             //System.out.println(this.replicarServerToPostgre(null));
@@ -91,7 +91,10 @@ public class Admin {
             try {
                 ResultSet results = postgre.createStatement().executeQuery("select table_name, table_schema from information_schema.tables where table_schema != 'information_schema' and table_schema != 'pg_catalog'");
                 while (results.next()) {
-                    tablasSinReplicar.add(results.getString("table_schema") + "." + results.getString("table_name"));
+                    if(!results.getString("table_name").equals("replicationlog")){
+                        tablasSinReplicar.add(results.getString("table_schema") + "." + results.getString("table_name"));
+                    }
+                    
 
                 }
             } catch (Exception e) {
@@ -391,17 +394,22 @@ public class Admin {
                 if (!replicarDatos2(schema, name, date)) {
                     return false;
                 }
+                
             }
+            String endEntry = "INSERT INTO replicationLog(op_id, operation)\n"
+                        + "SELECT COUNT(*) + 1 AS c, 'end' AS op\n"
+                        + "FROM replicationLog;";
+                sqlserver.createStatement().execute(endEntry);
 
         } catch (SQLException ex) {
-            Logger.getLogger(Admin.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
         }
         return true;
 
     }
 
     public boolean replicarEstructura2(String nombre, ArrayList<Atribute> atributos) {
-
+        this.printAtributos(atributos);
         String[] split = nombre.replace('.', '-').split("-");
         if (split.length == 2) {
             if (split[0].equals("public")) {
@@ -437,6 +445,9 @@ public class Admin {
                 } else if (name.equals("float8")) {
                     name = "float";
                     tampered = true;
+                }else if(name.equals("bpchar")){
+                    name = "char(1)";
+                    tampered = true;
                 }
 
                 if (alias != null) {
@@ -467,7 +478,10 @@ public class Admin {
                 }
 
                 if (atributos.get(i).isForeignKey()) {
-                    end += " foreign key (" + nombre + ") references " + atributos.get(i).getReference() + "(" + atributos.get(i).getColumnafk() + ")";
+                    if(!end.equals("")){
+                        end+=",";
+                    }
+                    end += " foreign key (" + atributos.get(i).getName() + ") references " + atributos.get(i).getReference().replace("public.", "dbo.") + "(" + atributos.get(i).getColumnafk() + ")";
 
                 }
                 if (i != atributos.size() - 1) {
@@ -486,10 +500,11 @@ public class Admin {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        create += ")";
+        create += ");";
 
         try {
             System.out.println(create);
+            
             sqlserver.createStatement().execute(create);
             return true;
         } catch (Exception e) {
@@ -595,13 +610,16 @@ public class Admin {
                             + "    AND tc.table_schema='" + schema + "'\n"
                             + "    AND tc.table_name='" + tabla + "'\n";
 
-                    ResultSet result = sqlserver.createStatement().executeQuery(sql);
+                    ResultSet result = postgre.createStatement().executeQuery(sql);
                     while (result.next()) {
 
                         String nameReference = result.getString("foreign_table_schema") + "." + result.getString("foreign_table_name");
+                       
                         boolean foreign = false;
                         for (int j = 0; j < this.tablasReplicadas.size(); j++) {
+                            
                             String actual = this.tablasReplicadas.get(j);
+                       
                             if (actual.equals(nameReference)) {
                                 foreign = true;
                                 //System.out.println(tablasReplicadas.get(currentPos));
@@ -692,7 +710,7 @@ public class Admin {
                 if (!replicarDatos1(schema, name, atributos, date)) {
                     return false;
                 }
-                
+
             }
             postgre.createStatement().execute("insert into replicationLog(operation,op_date) values ('end', now());");
         } catch (SQLException ex) {
@@ -833,26 +851,36 @@ public class Admin {
 
     private boolean replicarDatos2(String schema, String nombre, Date fecha) {
         ResultSet rs;
+        String schemaP = schema;
+        if (schemaP.equals("dbo")) {
+            schemaP = "public";
+        }
         try {
-            String formato = "YYYY-MM-dd HH:mm:ss:SS";
+            String formato = "YYYY-MM-dd HH:mm:ss.SS";
             SimpleDateFormat format = new SimpleDateFormat(formato);
             if (fecha == null) {
-                String query = "select * from bitacora where schema_object='" + schema + "' and table_object='" + nombre + "';";
+
+                String query = "select * from bitacora where schema_object='" + schemaP + "' and table_object='" + nombre + "';";
                 rs = postgre.createStatement().executeQuery(query);
             } else {
                 String fecha1 = format.format(fecha);
-                String query = "select * from bitacora where schema_object='" + schema + "' and table_object='" + nombre + "' and tran_begin_time > '" + fecha1 + "'";
+                String query = "select * from bitacora where schema_object='" + schemaP + "' and table_object='" + nombre + "' and op_date > '" + fecha1 + "'";
                 rs = postgre.createStatement().executeQuery(query);
 
             }
 
             while (rs.next()) {
-                rs = sqlserver.createStatement().executeQuery("select count(op_id) as c from replicationLog");
-                int id = rs.getInt("c") + 1;
-                String query = String.format("insert into replicationLog(op_id, operation, schema_object, table_object, sql_query) values (%d,'%s','&s','%s','%s')",id, rs.getString("operation"), rs.getString("schema_object"), rs.getString("table_object"), rs.getString("sql_query"));
+                ResultSet num = sqlserver.createStatement().executeQuery("select count(op_id) as c from replicationLog");
+                num.next();
+                int id = num.getInt("c") + 1;
+
+                String query = String.format("insert into replicationLog(op_id, operation, schema_object, table_object, sql_query) values (%d,'%s','%s','%s','%s')", id, rs.getString("operation"), schema, rs.getString("table_object"), rs.getString("sql_query").replace("'", "''"));
+                
+              
+                sqlserver.createStatement().execute(query);
             }
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
         return true;
     }
@@ -946,9 +974,6 @@ public class Admin {
                     postgre.createStatement().execute(query);
                 }
             }
-            
-            
-            
 
         } catch (Exception e) {
             e.printStackTrace();
