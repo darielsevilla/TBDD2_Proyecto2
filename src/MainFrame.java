@@ -450,11 +450,11 @@ public class MainFrame extends javax.swing.JFrame {
     private void bt_guardarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_guardarMouseClicked
 
        if (ValidarMotores()) {
-            boolean validado = true;
+            boolean validado = false;
             if (typeO == 2) {//si la base origen es postgres
                 admin = new Admin(tf_instanciaO.getText(), tf_instanciaD.getText(), tf_BDO.getText(), tf_BDD.getText(), tf_puertoO.getText(), tf_puertoD.getText(), tf_usuarioO.getText(), tf_usuarioD.getText(), tf_contraO.getText(), tf_contraD.getText(), 2);
                 validado = admin.connect();
-            } else if (typeD == 1) {//si la base de origen es sqlserver
+            } else if (typeO == 1) {//si la base de origen es sqlserver
 
                 admin = new Admin(tf_instanciaD.getText(), tf_instanciaO.getText(), tf_BDD.getText(), tf_BDO.getText(), tf_puertoD.getText(), tf_puertoO.getText(), tf_usuarioD.getText(), tf_usuarioO.getText(), tf_contraD.getText(), tf_contraO.getText(), 1);
                 validado =admin.connect();
