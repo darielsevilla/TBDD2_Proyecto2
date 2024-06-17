@@ -20,7 +20,7 @@ public class MainFrame extends javax.swing.JFrame {
         this.setResizable(true);
         
         //admin = new Admin("Prueba2", "Replicar", "2606","1433","user1", "prueba1", "Emilio2606", "Emilio2606", 2);
-        admin = new Admin("Prueba", "Prueba2", "5432","1434","postgres", "sa", "1234", "1234", 2);
+        admin = new Admin("persona4", "persona4", "5432","1434","postgres", "sa", "1234", "1234", 1);
         admin.connect();
     }
 

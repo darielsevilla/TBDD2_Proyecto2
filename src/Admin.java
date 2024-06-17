@@ -58,12 +58,11 @@ public class Admin {
             sqlserver = DriverManager.getConnection("jdbc:sqlserver://localhost:" + puerto_sqlserver + ";database=" + name_sqlserver + ";user=" + user_sqlserver + ";password=" + pass_sqlserver + ";encrypt=true;" + "trustServerCertificate=true;" + "loginTimeout=30;");
             loadTablas();
             
-            //this.printSinReplicar();
+            this.printSinReplicar();
             //System.out.println(this.tablasSinReplicar.get(8));
-            //this.tablasReplicadas.add(this.tablasSinReplicar.get(8));
-            //System.out.println(this.replicarServerToPostgre(null));
-            //tablasReplicadas.add(tablasSinReplicar.get(0));
-            //replicarServerToPostgre();
+            this.tablasReplicadas.add(this.tablasSinReplicar.get(8));
+            System.out.println(this.replicarServerToPostgre(null));
+            tablasReplicadas.add(tablasSinReplicar.get(0));
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -450,7 +449,7 @@ public class Admin {
         return true;
     }
 
-    //replicación de la estructura de la tabla en si (server -> postgre)
+    //replicación de la estructura de la tabla en si (sql server -> postgre)
     private boolean replicarEstructura1(String nombre, ArrayList<Atribute> atributos) {
         String create = "create table " + nombre + "(";
         ResultSet existe;
