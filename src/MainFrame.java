@@ -449,34 +449,50 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void bt_guardarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_guardarMouseClicked
 
-       if (ValidarMotores()) {
+        if (ValidarMotores()) {
+            String instanciaP = "";
+            String instanciaS = "";
             boolean validado = false;
             if (typeO == 2) {//si la base origen es postgres
-                admin = new Admin(tf_instanciaO.getText(), tf_instanciaD.getText(), tf_BDO.getText(), tf_BDD.getText(), tf_puertoO.getText(), tf_puertoD.getText(), tf_usuarioO.getText(), tf_usuarioD.getText(), tf_contraO.getText(), tf_contraD.getText(), 2);
+                instanciaP = tf_instanciaO.getText();
+                instanciaS = tf_instanciaD.getText();
+                if (instanciaP.contains("aws")) {
+                    instanciaP = "database-1.cxggq5ybhlzh.us-east-1.rds.amazonaws.com";
+                }
+                if (instanciaS.contains("aws")) {
+                    instanciaS = "database-1.cnm0hoi0bbn4.us-east-1.rds.amazonaws.com";
+                }
+                admin = new Admin(instanciaP, instanciaS, tf_BDO.getText(), tf_BDD.getText(), tf_puertoO.getText(), tf_puertoD.getText(), tf_usuarioO.getText(), tf_usuarioD.getText(), tf_contraO.getText(), tf_contraD.getText(), 2);
                 validado = admin.connect();
             } else if (typeO == 1) {//si la base de origen es sqlserver
+                instanciaS = tf_instanciaO.getText();
+                instanciaP = tf_instanciaD.getText();
+                if (instanciaP.contains("aws")) {
+                    instanciaP = "database-1.cxggq5ybhlzh.us-east-1.rds.amazonaws.com";
+                }
+                if (instanciaS.contains("aws")) {
+                    instanciaS = "database-1.cnm0hoi0bbn4.us-east-1.rds.amazonaws.com";
+                }
+                admin = new Admin(instanciaP, instanciaS, tf_BDD.getText(), tf_BDO.getText(), tf_puertoD.getText(), tf_puertoO.getText(), tf_usuarioD.getText(), tf_usuarioO.getText(), tf_contraD.getText(), tf_contraO.getText(), 1);
 
-                admin = new Admin(tf_instanciaD.getText(), tf_instanciaO.getText(), tf_BDD.getText(), tf_BDO.getText(), tf_puertoD.getText(), tf_puertoO.getText(), tf_usuarioD.getText(), tf_usuarioO.getText(), tf_contraD.getText(), tf_contraO.getText(), 1);
-                validado =admin.connect();
+                validado = admin.connect();
             } else {
                 JOptionPane.showMessageDialog(this, "¡No colocó bien los motores o están mal escritos!", "Warning", WARNING_MESSAGE);
             }
 
-            if(validado){
-               
+            if (validado) {
+
                 DefaultListModel tablaSR = (DefaultListModel) jl_tablaSR.getModel();
                 tablaSR.clear();
                 DefaultListModel tablaR = (DefaultListModel) jl_tablaR.getModel();
                 tablaR.clear();
                 tablaSR.addAll(admin.getTablasSinReplicar());
                 AbrirJD(Tablas);
-             
-            }else{
+
+            } else {
                 JOptionPane.showMessageDialog(this, "Conexion fallida", "Warning", WARNING_MESSAGE);
             }
-            
 
-            
         } else {
 
             JOptionPane.showMessageDialog(this, "¡No colocó bien los motores o están mal escritos!", "Warning", WARNING_MESSAGE);
@@ -536,7 +552,7 @@ public class MainFrame extends javax.swing.JFrame {
                 } else {
                     JOptionPane.showMessageDialog(this, "¡Prueba fallida!");
                 }
-            }else {//hay campos nulos
+            } else {//hay campos nulos
                 JOptionPane.showMessageDialog(this, "¡No se puede realizar la prueba! Hay al menos un campo sin texto.", "Warning", WARNING_MESSAGE);
             }
         }
@@ -545,6 +561,7 @@ public class MainFrame extends javax.swing.JFrame {
     public boolean test(String instancia, String base, String puerto, String usuario, String pw, int type) {
         try {
             if (type == 1) {//sqlserver
+                System.out.println("jdbc:" + instancia + ":" + puerto + ";database=" + base + ";user=" + usuario + ";password=" + pw + ";encrypt=true;" + "trustServerCertificate=true;" + "loginTimeout=30;");
                 DriverManager.getConnection("jdbc:" + instancia + ":" + puerto + ";database=" + base + ";user=" + usuario + ";password=" + pw + ";encrypt=true;" + "trustServerCertificate=true;" + "loginTimeout=30;");
             } else {
                 DriverManager.getConnection("jdbc:" + instancia + ":" + puerto + "/" + base, usuario, pw);//postgres
@@ -552,6 +569,7 @@ public class MainFrame extends javax.swing.JFrame {
             }
             return true;
         } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
 
@@ -574,7 +592,7 @@ public class MainFrame extends javax.swing.JFrame {
                 } else {
                     JOptionPane.showMessageDialog(this, "¡Prueba fallida!");
                 }
-            }else {//hay campos nulos
+            } else {//hay campos nulos
                 JOptionPane.showMessageDialog(this, "¡No se puede realizar la prueba! Hay al menos un campo sin texto.", "Warning", WARNING_MESSAGE);
             }
         }
@@ -583,7 +601,7 @@ public class MainFrame extends javax.swing.JFrame {
     private void bt_rightMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_bt_rightMouseClicked
         DefaultListModel tablaSR = (DefaultListModel) jl_tablaSR.getModel();
         DefaultListModel tablaR = (DefaultListModel) jl_tablaR.getModel();
-        
+
         int index = jl_tablaSR.getSelectedIndex();
         if (index > -1) {
             admin.getTablasSinReplicar().remove(tablaSR.get(index).toString());
@@ -591,7 +609,7 @@ public class MainFrame extends javax.swing.JFrame {
             tablaR.addElement(tablaSR.get(index));
             tablaSR.remove(index);
         } else {
-            JOptionPane.showMessageDialog(this, "¡No hay ninguna tabla seleccionada!", "Warning", WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(Tablas, "¡No hay ninguna tabla seleccionada!", "Warning", WARNING_MESSAGE);
         }
     }//GEN-LAST:event_bt_rightMouseClicked
 
@@ -606,7 +624,7 @@ public class MainFrame extends javax.swing.JFrame {
             tablaSR.addElement(tablaR.get(index));
             tablaR.remove(index);
         } else {
-            JOptionPane.showMessageDialog(this, "¡No hay ninguna tabla seleccionada!", "Warning", WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(Tablas, "¡No hay ninguna tabla seleccionada!", "Warning", WARNING_MESSAGE);
         }
     }//GEN-LAST:event_bt_leftMouseClicked
 
@@ -615,20 +633,35 @@ public class MainFrame extends javax.swing.JFrame {
 
         if (admin.getCual() == 1) {
             funciono = admin.replicarServerToPostgre(fecha);
+            /*if(admin.borrarNoReplicados()){
+                funciono = admin.replicarServerToPostgre(fecha);
+            }*/
+
             //el null se va a cambiar por la date actual, si es la primera vez q se usa si va a ser null
         } else {
             funciono = admin.replicarPostgreToServer(fecha);
+            /*if(admin.borrarNoReplicados()){
+                funciono = admin.replicarPostgreToServer(fecha);
+            }
+             */
             //el null se va a cambiar por la date actual, si es la primera vez q se usa si va a ser null
         }
-        
-        if(funciono){
-            JOptionPane.showMessageDialog(this, "La base se replico exitosamente");
+
+        if (funciono) {
+            JOptionPane.showMessageDialog(Tablas, "La base se replico exitosamente");
+            admin.setPreviousReplicated(admin.getTablasReplicadas());
             fecha = new Date();
             FechaActual.setText(fecha.toString());
-        }else{
-            JOptionPane.showMessageDialog(this, "La base no se replico");
+            System.out.println("------------------------");
+            admin.printPrevious();
+            System.out.println("----------------------");
+        } else {
+            JOptionPane.showMessageDialog(Tablas, "La base no se replico");
+            System.out.println("------------------------");
+            admin.printPrevious();
+            System.out.println("----------------------");
         }
-        
+
         /*
         //actualizar la lista de tablas sin replicar
         DefaultListModel tablaSR = (DefaultListModel) jl_tablaSR.getModel();
@@ -648,7 +681,7 @@ public class MainFrame extends javax.swing.JFrame {
         for (int i = 0; i < admin.getTablasReplicadas().size(); i++) {
             System.out.println(admin.getTablasReplicadas().get(i));
         }
-        */
+         */
     }//GEN-LAST:event_bt_guardarTMouseClicked
 
     private void tf_usuarioOActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tf_usuarioOActionPerformed
@@ -764,13 +797,13 @@ public class MainFrame extends javax.swing.JFrame {
         flag = ClasificarType(2);
 
         if (origen == null || destino == null) {
-            
+
             flag = false;
         } else if ("postgresql".equals(origen) && "postgresql".equals(destino)) {
-     
+
             flag = false;
         } else if ("sqlserver".equals(origen) && "sqlserver".equals(destino)) {
-        
+
             flag = false;
         }
 
